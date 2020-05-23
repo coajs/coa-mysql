@@ -1,6 +1,6 @@
 {
   "name": "coa-mysql",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "mysql component for coa",
   "keywords": [
     "coajs",
@@ -20,8 +20,8 @@
     "npm-publish": "yarn build && yarn version --patch && cp package.json README.md dist && cd dist && npm publish"
   },
   "dependencies": {
-    "coa-redis": "^1.0.3",
-    "coa-secure": "^1.0.3",
+    "coa-redis": "*",
+    "coa-secure": "*",
     "knex": "^0.21.1",
     "mysql": "^2.18.1"
   },
