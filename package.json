@@ -1,0 +1,32 @@
+{
+  "name": "coa-mysql",
+  "version": "1.0.2",
+  "description": "mysql component for coa",
+  "keywords": [
+    "coajs",
+    "coa",
+    "mysql"
+  ],
+  "license": "MIT",
+  "author": "Aex",
+  "homepage": "https://github.com/coajs/coa-mysql",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/coajs/coa-mysql.git"
+  },
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "rm -rf dist && tsc && cp package.json dist",
+    "npm-publish": "yarn build && yarn version --patch && cp package.json README.md dist && cd dist && npm publish"
+  },
+  "dependencies": {
+    "coa-redis": "^1.0.3",
+    "coa-secure": "^1.0.3",
+    "knex": "^0.21.1",
+    "mysql": "^2.18.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.5",
+    "typescript": "^3.9.3"
+  }
+}
