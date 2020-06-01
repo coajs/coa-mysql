@@ -5,7 +5,7 @@ import mysql from './mysql'
 import { Dic, ModelOption, Page, Query, Transaction } from './typings'
 import uuid from './uuid'
 
-const DefaultPageRows = 50, MaxPageRows = 1000
+const MaxPageRows = 2000
 const Databases = env.mysql.databases
 const suffix = env.isOnline ? '' : env.runEnv
 
@@ -16,6 +16,7 @@ export class MysqlNative<Scheme> {
   protected readonly title: string
   protected readonly scheme: any
   protected readonly prefix: string
+  protected readonly system: string
   protected readonly database: string
   protected readonly increment: string
   protected readonly ms: number
@@ -35,10 +36,10 @@ export class MysqlNative<Scheme> {
     this.increment = option.increment || 'id'
 
     // 处理database
-    const databaseAlias = option.database || 'main'
-    const databaseConfig = Databases[databaseAlias] || die.hint(`MySQL错误: 缺少${databaseAlias}数据库`)
-    this.database = databaseConfig.database
-    this.ms = databaseConfig.ms
+    this.system = option.system || 'main'
+    const database = Databases[this.system] || die.hint(`MySQL错误: 缺少${this.system}系统数据库配置`)
+    this.database = database.database
+    this.ms = database.ms
 
     // 处理caches
     this.caches = _.defaults(option.caches, { index: [], count: [] })
@@ -159,8 +160,7 @@ export class MysqlNative<Scheme> {
 
   // 获取table对象
   table (trx?: Transaction) {
-    const table = mysql.io<Scheme>(this.name)
-    this.database && table.withSchema(this.database)
+    const table = mysql.io<Scheme>(this.name).withSchema(this.database)
     trx && table.transacting(trx)
     return table
   }
@@ -177,6 +177,7 @@ export class MysqlNative<Scheme> {
     const qb = this.table(trx).select(this.name + '.' + this.key)
     query(qb)
     qb.orderBy(this.name + '.' + this.increment, 'desc')
+    qb.limit(MaxPageRows)
     return await qb as Scheme[]
   }
 
@@ -205,7 +206,7 @@ export class MysqlNative<Scheme> {
   protected checkPage (page: Page) {
     let last = page.last, rows = page.rows, more = false as boolean
     if (last < 0) last = 0
-    if (rows < 1) rows = DefaultPageRows
+    if (rows < 1) die.hint('page rows 参数有误')
     else if (rows > MaxPageRows) rows = MaxPageRows
     return { last, rows, more }
   }

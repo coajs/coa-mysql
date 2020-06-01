@@ -117,7 +117,7 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
   }
 
   protected cacheNsp (...nsp: string[]) {
-    return this.name + ':' + nsp.join(':')
+    return this.system + ':' + this.name + ':' + nsp.join(':')
   }
 
   private async cacheChangeDataList (ids: string[], data?: SafePartial<Scheme>, trx?: Transaction) {

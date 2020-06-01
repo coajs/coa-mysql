@@ -12,7 +12,7 @@ export type ModelOption<T> = {
   title?: string,
   key?: string,
   prefix?: string,
-  database?: string,
+  system?: string,
   increment?: string,
   pick: string[],
   unpick?: string[],
@@ -26,7 +26,6 @@ export interface MysqlEnv {
   password: string
   charset: string
   databases: {
-    main: { database: string, ms: number },
     [name: string]: { database: string, ms: number }
   }
   debug: boolean
