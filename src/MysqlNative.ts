@@ -1,10 +1,13 @@
+import { env } from 'coa-env'
+import { die } from 'coa-error'
 import { _ } from 'coa-helper'
 import mysql from './mysql'
 import { Dic, ModelOption, Page, Query, Transaction } from './typings'
 import uuid from './uuid'
 
-const DefaultPageRows = 20, MaxPageRows = 1000
-const DefaultMS = 30 * 24 * 3600 * 1000
+const DefaultPageRows = 50, MaxPageRows = 1000
+const Databases = env.mysql.databases
+const suffix = env.isOnline ? '' : env.runEnv
 
 export class MysqlNative<Scheme> {
 
@@ -26,12 +29,17 @@ export class MysqlNative<Scheme> {
   constructor (option: ModelOption<Scheme>) {
     // 处理基本数据
     this.name = _.snakeCase(option.name)
-    this.title = option.title || ''
-    this.scheme = option.scheme
-    this.database = option.database || ''
-    this.increment = option.increment || 'id'
-    this.ms = option.ms || DefaultMS
+    this.title = option.title || _.startCase(this.name)
+    this.scheme = option.scheme || die.hint(`MySQL错误: ${this.name}模型缺少scheme`)
     this.prefix = option.prefix || option.name.substr(0, 3).toLowerCase()
+    this.increment = option.increment || 'id'
+
+    // 处理database
+    const databaseAlias = option.database || 'main'
+    const databaseConfig = Databases[databaseAlias] || die.hint(`MySQL错误: 缺少${databaseAlias}数据库`)
+    this.database = databaseConfig.database
+    this.ms = databaseConfig.ms
+
     // 处理caches
     this.caches = _.defaults(option.caches, { index: [], count: [] })
     // 将需要用到缓存的字段单独记录为一个数组，方便判断是否需要处理缓存
@@ -53,13 +61,9 @@ export class MysqlNative<Scheme> {
     this.key = option.key || this.columns[0]
   }
 
-  // 检查分页参数
-  private static checkPage (page: Page) {
-    let last = page.last, rows = page.rows, more = false as boolean
-    if (last < 0) last = 0
-    if (rows < 1) rows = DefaultPageRows
-    else if (rows > MaxPageRows) rows = MaxPageRows
-    return { last, rows, more }
+  // 获取ID
+  public async newId () {
+    return this.prefix + await uuid.hexId() + suffix
   }
 
   // 插入
@@ -100,7 +104,7 @@ export class MysqlNative<Scheme> {
   }
 
   // 通过查询条件更新
-  async updateByIdQuery (id: string, query: Query, data: Partial<Scheme>, trx?: Transaction) {
+  async updateForQueryById (id: string, query: Query, data: Partial<Scheme>, trx?: Transaction) {
     _.defaults(data, { updated: _.now() })
     const qb = this.table(trx).where({ [this.key]: id })
     query(qb)
@@ -179,7 +183,7 @@ export class MysqlNative<Scheme> {
   // 查询ID格式分页列表
   protected async selectIdPageList (page: Page, query: Query, trx?: Transaction) {
 
-    let { last, rows, more } = MysqlNative.checkPage(page)
+    let { last, rows, more } = this.checkPage(page)
 
     const qb = this.table(trx).select(this.name + '.' + this.key)
     query(qb)
@@ -197,34 +201,13 @@ export class MysqlNative<Scheme> {
     return { list, page: { last, more, rows } }
   }
 
-  // 查询第一条数据
-  protected async selectFirst (query: Query, pick = this.pick, trx?: Transaction) {
-    const qb = this.table(trx).select(pick)
-    query(qb)
-    qb.orderBy(this.name + '.' + this.increment, 'desc')
-    const first = await qb.first()
-    return this.result(first, pick)
-  }
-
-  // 查询列表
-  protected async selectList (query: Query, pick = this.pick, trx?: Transaction) {
-    const qb = this.table(trx).select(pick)
-    query(qb)
-    qb.orderBy(this.name + '.' + this.increment, 'desc')
-    const list = await qb
-    return list.map(v => this.result(v, pick) as Scheme) || []
-  }
-
-  // 计数
-  protected async count (query: Query, trx?: Transaction) {
-    const qb = this.table(trx).count({ result: this.name + '.' + this.increment })
-    query(qb)
-    return (await qb)[0]?.result || 0
-  }
-
-  // 获取ID
-  protected async newId () {
-    return this.prefix + await uuid.hexId()
+  // 检查分页参数
+  protected checkPage (page: Page) {
+    let last = page.last, rows = page.rows, more = false as boolean
+    if (last < 0) last = 0
+    if (rows < 1) rows = DefaultPageRows
+    else if (rows > MaxPageRows) rows = MaxPageRows
+    return { last, rows, more }
   }
 
   // 从数据库获取之后补全数据

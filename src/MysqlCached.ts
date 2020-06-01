@@ -1,5 +1,5 @@
 import { die } from 'coa-error'
-import { _ } from 'coa-helper'
+import { $, _ } from 'coa-helper'
 import { cache } from 'coa-redis'
 import { secure } from 'coa-secure'
 import { MysqlNative } from './MysqlNative'
@@ -27,9 +27,9 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
     return result
   }
 
-  async updateByIdQuery (id: string, query: Query, data: SafePartial<Scheme>, trx?: Transaction) {
+  async updateForQueryById (id: string, query: Query, data: SafePartial<Scheme>, trx?: Transaction) {
     const dataList = await this.cacheChangeDataList([id], data, trx)
-    const result = await super.updateByIdQuery(id, query, data, trx)
+    const result = await super.updateForQueryById(id, query, data, trx)
     if (result)
       await this.cacheDeleteWork([id], dataList)
     return result
@@ -51,7 +51,7 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
   }
 
   async checkById (id: string, pick = this.columns, trx?: Transaction, ms = this.ms) {
-    return await this.getById(id, pick, trx, ms) || die.hint(`${this.title || this.name}不存在`)
+    return await this.getById(id, pick, trx, ms) || die.hint(`${this.title}不存在`)
   }
 
   async getById (id: string, pick = this.columns, trx?: Transaction, ms = this.ms) {
@@ -79,31 +79,35 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
     await this.cacheDeleteWork([], [])
   }
 
-  protected async findIdList (finger: string, query: Query, trx?: Transaction) {
-    const cacheId = 'list:' + finger
-    return await cache.warp(this.cacheNsp('data'), cacheId, () => super.selectIdList(query, trx))
+  protected async findIdList (finger: Dic<any>[], query: Query, trx?: Transaction) {
+    const cacheNsp = this.cacheNsp('data')
+    const cacheId = 'list:' + secure.sha1($.sortQueryString(...finger))
+    return await cache.warp(cacheNsp, cacheId, () => super.selectIdList(query, trx))
   }
 
-  protected async findIdPageList (finger: string, page: Page, query: Query, trx?: Transaction) {
-    const cacheId = `page:${page.rows}:${page.last}:` + finger
-    return await cache.warp(this.cacheNsp('data'), cacheId, () => super.selectIdPageList(page, query, trx))
+  protected async findIdPageList (finger: Dic<any>[], page: Page, query: Query, trx?: Transaction) {
+    const cacheNsp = this.cacheNsp('data')
+    const cacheId = `page:${page.rows}:${page.last}:` + secure.sha1($.sortQueryString(...finger))
+    return await cache.warp(cacheNsp, cacheId, () => super.selectIdPageList(page, query, trx))
   }
 
   protected async mGetCountBy (field: string, ids: string[], trx?: Transaction) {
-    return await cache.mWarp(this.cacheNsp('count', field), ids, async ids => {
+    const cacheNsp = this.cacheNsp('count', field)
+    return await cache.mWarp(cacheNsp, ids, async ids => {
       const rows = await this.table(trx).select({ id: field }).count({ count: this.key }).whereIn(field, ids).groupBy(field) as any[]
       const result = {} as Dic<number>
       _.forEach(rows, ({ id, count }) => result[id] = count)
       return result
-    })
+    }) as Promise<Dic<number>>
   }
 
   protected async getCountBy (field: string, value: string, query?: Query, trx?: Transaction) {
-    return await cache.warp(this.cacheNsp('count', field), value, async () => {
+    const cacheNsp = this.cacheNsp('count', field)
+    return await cache.warp(cacheNsp, value, async () => {
       const qb = this.table(trx).count({ count: this.key })
-      typeof query === 'function' ? query(qb) : qb.where(field, value)
+      query ? query(qb) : qb.where(field, value)
       const rows = await qb
-      return rows[0]?.count || 0
+      return rows[0]?.count as number || 0
     })
   }
 
@@ -114,24 +118,6 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
 
   protected cacheNsp (...nsp: string[]) {
     return this.name + ':' + nsp.join(':')
-  }
-
-  protected cacheFinger (data: Dic<any>, ...data2: Dic<any>[]) {
-    let arr1 = [] as string[], arr2 = [] as string[]
-    _.forEach(_.pickBy(data), (v, k) => {
-      const val = typeof v === 'object' ? JSON.stringify(v) : v
-      arr1.push(k + '=' + val)
-    })
-    arr1 = arr1.sort()
-    _.forEach(data2, data => {
-      _.forEach(_.pickBy(data), (v, k) => {
-        const val = typeof v === 'object' ? JSON.stringify(v) : v
-        arr2.push(k + '=' + val)
-      })
-    })
-    arr2 = arr2.sort()
-    const str = arr1.join('&') + '&' + arr2.join('&')
-    return secure.sha1(str)
   }
 
   private async cacheChangeDataList (ids: string[], data?: SafePartial<Scheme>, trx?: Transaction) {

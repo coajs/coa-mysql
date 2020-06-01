@@ -3,15 +3,18 @@ import { env } from 'coa-env'
 import { die } from 'coa-error'
 import Knex from './Knex'
 
+const mysql_env = env.mysql
+const mysql_env_main = env.mysql.databases.main || die.hint('缺少main数据库配置')
+
 const mysql = Knex({
   client: 'mysql',
   connection: {
-    host: env.mysql.host,
-    port: env.mysql.port,
-    user: env.mysql.user,
-    password: env.mysql.password,
-    database: env.mysql.database,
-    charset: env.mysql.charset,
+    host: mysql_env.host,
+    port: mysql_env.port,
+    user: mysql_env.user,
+    password: mysql_env.password,
+    database: mysql_env_main.database,
+    charset: mysql_env.charset,
   },
   debug: env.mysql.debug || false,
 })

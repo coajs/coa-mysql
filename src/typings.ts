@@ -14,20 +14,22 @@ export type ModelOption<T> = {
   prefix?: string,
   database?: string,
   increment?: string,
-  ms?: number,
   pick: string[],
   unpick?: string[],
-  caches?: { [name: string]: string[] },
+  caches?: { index?: string[], count?: string[] },
 }
 
 export interface MysqlEnv {
   host: string
-  port: number,
+  port: number
   user: string
-  password: string,
-  database: string
-  charset: string,
-  debug: boolean,
+  password: string
+  charset: string
+  databases: {
+    main: { database: string, ms: number },
+    [name: string]: { database: string, ms: number }
+  }
+  debug: boolean
   trace: boolean
 }
 
