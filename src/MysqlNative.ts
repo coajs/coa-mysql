@@ -38,8 +38,8 @@ export class MysqlNative<Scheme> {
     // 处理database
     this.system = option.system || 'main'
     const database = Databases[this.system] || die.hint(`MySQL错误: 缺少${this.system}系统数据库配置`)
-    this.database = database.database
-    this.ms = database.ms
+    this.database = database.database || die.hint(`MySQL错误: 缺少${this.system}系统database配置`)
+    this.ms = database.ms || die.hint(`MySQL错误: 缺少${this.system}系统ms配置`)
 
     // 处理caches
     this.caches = _.defaults(option.caches, { index: [], count: [] })

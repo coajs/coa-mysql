@@ -1,6 +1,6 @@
 {
   "name": "coa-mysql",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Mysql component for coa",
   "keywords": [
     "coajs",

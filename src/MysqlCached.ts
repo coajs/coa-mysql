@@ -144,9 +144,8 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
         const keys = item.split(/[:,]/)
         const key = keys[0]
         const ids = [] as string[]
-        dataList.forEach(data => {
-          const dataId = (data as any)[key] as string || ''
-          dataId && ids.push(dataId)
+        dataList.forEach((data: any) => {
+          data && data[key] && ids.push(data[key])
         })
         ids.push(...keys.slice(1))
         ids.length && deleteIds.push([this.cacheNsp(name, key), ids])
