@@ -11,16 +11,16 @@ const suffix = env.isOnline ? '' : env.runEnv
 
 export class MysqlNative<Scheme> {
 
-  protected readonly key: string
-  protected readonly name: string
-  protected readonly title: string
-  protected readonly scheme: any
-  protected readonly prefix: string
+  public readonly key: string
+  public readonly name: string
+  public readonly title: string
+  public readonly pick: string[]
   protected readonly system: string
   protected readonly database: string
   protected readonly increment: string
+  protected readonly scheme: any
+  protected readonly prefix: string
   protected readonly ms: number
-  protected readonly pick: string[]
   protected readonly caches = {} as { index: string[], count: string[], [name: string]: string[] }
   protected readonly cachesFields = [] as string[]
   protected readonly columns = [] as string[]

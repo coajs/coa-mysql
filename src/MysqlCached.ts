@@ -59,11 +59,6 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
     return this.pickResult(result, pick)
   }
 
-  async getBy (field: string, value: string | number, pick = this.columns, trx?: Transaction) {
-    const id = await this.getIdBy(field, value, trx)
-    return id ? await this.getById(id, pick) : null
-  }
-
   async getIdBy (field: string, value: string | number, trx?: Transaction) {
     return await cache.warp(this.cacheNsp('index', field), '' + value, () => super.getIdBy(field, value, trx))
   }
