@@ -74,6 +74,12 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
     await this.cacheDeleteWork([], [])
   }
 
+  protected async findListCount (finger: Dic<any>[], query: Query, trx?: Transaction) {
+    const cacheNsp = this.cacheNsp('data')
+    const cacheId = 'list-count:' + secure.sha1($.sortQueryString(...finger))
+    return await cache.warp(cacheNsp, cacheId, () => super.selectListCount(query, trx))
+  }
+
   protected async findIdList (finger: Dic<any>[], query: Query, trx?: Transaction) {
     const cacheNsp = this.cacheNsp('data')
     const cacheId = 'list:' + secure.sha1($.sortQueryString(...finger))

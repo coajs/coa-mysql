@@ -172,12 +172,19 @@ export class MysqlNative<Scheme> {
     return data[this.key] || ''
   }
 
+  // 查询全部列表数量
+  protected async selectListCount (query: Query, trx?: Transaction) {
+    const qb = this.table(trx).count({ count: this.key })
+    query(qb)
+    const rows = await qb
+    return rows[0]?.count as number || 0
+  }
+
   // 查询ID格式全部列表
   protected async selectIdList (query: Query, trx?: Transaction) {
     const qb = this.table(trx).select(this.name + '.' + this.key)
     query(qb)
     qb.orderBy(this.name + '.' + this.increment, 'desc')
-    qb.limit(MaxPageRows)
     return await qb as Scheme[]
   }
 

@@ -3,21 +3,21 @@
 
 
 "@types/ioredis@^4.16.3":
-  version "4.16.4"
-  resolved "https://registry.npmjs.org/@types/ioredis/-/ioredis-4.16.4.tgz#e68ca1635fa03bd51de26fed98d0eac09ccc96ba"
-  integrity sha512-kQsBNrNWlk93CJ0RawjMt2RK+jee1o6SYKmPvpYoMu9ofW9ell/tOblnObf5cx5DtoDWjlaOn+jgF+bA+U78Lw==
+  version "4.17.0"
+  resolved "https://registry.npmjs.org/@types/ioredis/-/ioredis-4.17.0.tgz#25fea62388f546958d53e31bbb6284b60c793e60"
+  integrity sha512-2wmT+lB9JAHSYlBrmJGeYDQ4cGlIgxmaC3Bv85LJws/G/OkoFoxPezhMqtTp0JMCgsMadIoI9c43QvRz8WKLSw==
   dependencies:
     "@types/node" "*"
 
 "@types/lodash@^4.14.152":
-  version "4.14.155"
-  resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.155.tgz#e2b4514f46a261fd11542e47519c20ebce7bc23a"
-  integrity sha512-vEcX7S7aPhsBCivxMwAANQburHBtfN9RdyXFk84IJmu2Z4Hkg1tOFgaslRiEqqvoLtbCBi6ika1EMspE+NZ9Lg==
+  version "4.14.157"
+  resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.157.tgz#fdac1c52448861dfde1a2e1515dbc46e54926dc8"
+  integrity sha512-Ft5BNFmv2pHDgxV5JDsndOWTRJ+56zte0ZpYLowp03tW+K+t8u8YMOzAnpuqPgzX6WO1XpDIUm7u04M8vdDiVQ==
 
-"@types/node@*", "@types/node@^14.0.12":
-  version "14.0.12"
-  resolved "https://registry.npmjs.org/@types/node/-/node-14.0.12.tgz#9c1d8ffb8084e8936603a6122a7649e40e68e04b"
-  integrity sha512-/sjzehvjkkpvLpYtN6/2dv5kg41otMGuHQUt9T2aiAuIfleCQRQHXXzF1eAw/qkZTj5Kcf4JSTf7EIizHocy6Q==
+"@types/node@*", "@types/node@^14.0.14":
+  version "14.0.14"
+  resolved "https://registry.npmjs.org/@types/node/-/node-14.0.14.tgz#24a0b5959f16ac141aeb0c5b3cd7a15b7c64cbce"
+  integrity sha512-syUgf67ZQpaJj01/tRTknkMNoBBLWJOBODF0Zm4NrXmiSuxjymFrxnTu1QVYRubhVkRcZLYZG8STTwJRdVm/WQ==
 
 arr-diff@^4.0.0:
   version "4.0.0"
@@ -158,10 +158,10 @@ coa-helper@^1.0.6:
     hashids "^2.2.1"
     lodash "^4.17.15"
 
-coa-redis@^1.0.12:
-  version "1.0.12"
-  resolved "https://registry.npmjs.org/coa-redis/-/coa-redis-1.0.12.tgz#727255203ff55a6f451047eb31ed21f6916419e3"
-  integrity sha512-W/f4UypQHtZcaK4thSIlHm6S5iNH2VMSHqJHacTVEG0mrPqMKjrn+EK4CwXt2Vk6xCfyFH+kSnwe28BC7UtjeQ==
+coa-redis@^1.0.16:
+  version "1.0.16"
+  resolved "https://registry.npmjs.org/coa-redis/-/coa-redis-1.0.16.tgz#a796564ed690b3d4ca05497de623ebc0bf080b85"
+  integrity sha512-TLG+JzEcXBeGvGW70mB2DIlF5wf7rsFx9xVHeBQ4QjjA+ubYV7DFq/oxUl4WS6MYEaw1bXFVdSlp/cYYh/Rotg==
   dependencies:
     "@types/ioredis" "^4.16.3"
     ioredis "^4.17.3"
@@ -205,9 +205,9 @@ core-util-is@~1.0.0:
   integrity sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
 
 dayjs@^1.8.27:
-  version "1.8.28"
-  resolved "https://registry.npmjs.org/dayjs/-/dayjs-1.8.28.tgz#37aa6201df483d089645cb6c8f6cef6f0c4dbc07"
-  integrity sha512-ccnYgKC0/hPSGXxj7Ju6AV/BP4HUkXC2u15mikXT5mX9YorEaoi1bEKOmAqdkJHN4EEkmAf97SpH66Try5Mbeg==
+  version "1.8.29"
+  resolved "https://registry.npmjs.org/dayjs/-/dayjs-1.8.29.tgz#5d23e341de6bfbd206c01136d2fb0f01877820f5"
+  integrity sha512-Vm6teig8ZWK7rH/lxzVGxZJCljPdmUr6q/3f4fr5F0VWNGVkZEjZOQJsAN8hUHUqn+NK4XHNEpJZS1MwLyDcLw==
 
 debug@4.1.1, debug@^4.1.1:
   version "4.1.1"
@@ -1108,10 +1108,10 @@ to-regex@^3.0.1, to-regex@^3.0.2:
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
 
-typescript@^3.9.5:
-  version "3.9.5"
-  resolved "https://registry.npmjs.org/typescript/-/typescript-3.9.5.tgz#586f0dba300cde8be52dd1ac4f7e1009c1b13f36"
-  integrity sha512-hSAifV3k+i6lEoCJ2k6R2Z/rp/H3+8sdmcn5NrS3/3kE7+RyZXm9aqvxWqjEXHAd8b0pShatpcdMTvEdvAJltQ==
+typescript@^3.9.6:
+  version "3.9.6"
+  resolved "https://registry.npmjs.org/typescript/-/typescript-3.9.6.tgz#8f3e0198a34c3ae17091b35571d3afd31999365a"
+  integrity sha512-Pspx3oKAPJtjNwE92YS05HQoY7z2SFyOpHo9MqJor3BXAGNaPUs83CuVp9VISFkSjyRfiTpmKuAYGJB7S7hOxw==
 
 unc-path-regex@^0.1.2:
   version "0.1.2"
