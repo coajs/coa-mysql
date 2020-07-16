@@ -50,12 +50,12 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
     return result
   }
 
-  async checkById (id: string, pick = this.columns, trx?: Transaction, ms = this.ms) {
-    return await this.getById(id, pick, trx, ms) || die.hint(`${this.title}不存在`)
+  async checkById (id: string, pick = this.columns, trx?: Transaction, ms = this.ms, force = false) {
+    return await this.getById(id, pick, trx, ms, force) || die.hint(`${this.title}不存在`)
   }
 
-  async getById (id: string, pick = this.columns, trx?: Transaction, ms = this.ms) {
-    const result = await cache.warp(this.getCacheNsp('id'), id, () => super.getById(id, this.columns, trx), ms)
+  async getById (id: string, pick = this.columns, trx?: Transaction, ms = this.ms, force = false) {
+    const result = await cache.warp(this.getCacheNsp('id'), id, () => super.getById(id, this.columns, trx), ms, force)
     return this.pickResult(result, pick)
   }
 
@@ -63,8 +63,8 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
     return await cache.warp(this.getCacheNsp('index', field), '' + value, () => super.getIdBy(field, value, trx))
   }
 
-  async mGetByIds (ids: string[], pick = this.pick, trx?: Transaction, ms = this.ms) {
-    const result = await cache.mWarp(this.getCacheNsp('id'), ids, ids => super.mGetByIds(ids, this.columns, trx), ms)
+  async mGetByIds (ids: string[], pick = this.pick, trx?: Transaction, ms = this.ms, force = false) {
+    const result = await cache.mWarp(this.getCacheNsp('id'), ids, ids => super.mGetByIds(ids, this.columns, trx), ms, force)
     _.forEach(result, (v, k) => result[k] = this.pickResult(v, pick))
     return result
   }
