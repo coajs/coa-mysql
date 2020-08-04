@@ -2,7 +2,7 @@ import { env } from 'coa-env'
 import { die } from 'coa-error'
 import { _ } from 'coa-helper'
 import mysql from './mysql'
-import { Dic, ModelOption, Page, Query, Transaction } from './typings'
+import { Dic, ModelOption, Pager, Query, Transaction } from './typings'
 import uuid from './uuid'
 
 const MaxPageRows = 2000
@@ -174,7 +174,7 @@ export class MysqlNative<Scheme> {
 
   // 查询全部列表数量
   protected async selectListCount (query: Query, trx?: Transaction) {
-    const qb = this.table(trx).count({ count: this.key })
+    const qb = this.table(trx).count({ count: this.name + '.' + this.increment })
     query(qb)
     const rows = await qb
     return rows[0]?.count as number || 0
@@ -188,10 +188,10 @@ export class MysqlNative<Scheme> {
     return await qb as Scheme[]
   }
 
-  // 查询ID格式分页列表
-  protected async selectIdPageList (page: Page, query: Query, trx?: Transaction) {
+  // 查询ID格式Sort列表
+  protected async selectIdSortList (pager: Pager, query: Query, trx?: Transaction) {
 
-    let { last, rows, more } = this.checkPage(page)
+    let { last, rows, more } = this.checkSortPager(pager)
 
     const qb = this.table(trx).select(this.name + '.' + this.key)
     query(qb)
@@ -209,13 +209,42 @@ export class MysqlNative<Scheme> {
     return { list, page: { last, more, rows } }
   }
 
+  // 查询ID格式Sort列表
+  protected async selectIdViewList (pager: Pager, query: Query, trx?: Transaction, count?: number) {
+
+    if (count === undefined)
+      count = await this.selectListCount(query, trx)
+
+    let { rows, page, pageMax } = this.checkViewPager(pager, count)
+
+    const qb = this.table(trx).select(this.name + '.' + this.key)
+    query(qb)
+    qb.limit(rows).offset(rows * (page - 1))
+    qb.orderBy(this.name + '.' + this.increment, 'desc')
+    const list = await qb as Scheme[]
+    rows = list.length
+
+    return { list, pager: { rows, page, pageMax, count } }
+  }
+
   // 检查分页参数
-  protected checkPage (page: Page) {
-    let last = page.last, rows = page.rows, more = false as boolean
+  protected checkSortPager (pager: Pager) {
+    let last = pager.last, rows = pager.rows, more = false as boolean
     if (last < 0) last = 0
-    if (rows < 1) die.hint('page rows 参数有误')
+    if (rows < 1) die.hint('pager rows 参数有误')
     else if (rows > MaxPageRows) rows = MaxPageRows
     return { last, rows, more }
+  }
+
+  // 检查View分页参数
+  protected checkViewPager (pager: Pager, count: number) {
+    let rows = pager.rows, page = pager.page
+    if (rows < 1) die.hint('pager rows 参数有误')
+    else if (rows > MaxPageRows) rows = MaxPageRows
+    let pageMax = _.ceil(count / rows)
+    if (page > pageMax) page = pageMax
+    if (page < 1) page = 1
+    return { rows, page, pageMax }
   }
 
   // 从数据库获取之后补全数据

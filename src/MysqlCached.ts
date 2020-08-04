@@ -3,7 +3,7 @@ import { $, _ } from 'coa-helper'
 import { cache } from 'coa-redis'
 import { secure } from 'coa-secure'
 import { MysqlNative } from './MysqlNative'
-import { Dic, Page, Query, SafePartial, Transaction } from './typings'
+import { Dic, Pager, Query, SafePartial, Transaction } from './typings'
 
 export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
 
@@ -86,10 +86,17 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
     return await cache.warp(cacheNsp, cacheId, () => super.selectIdList(query, trx))
   }
 
-  protected async findIdPageList (finger: Dic<any>[], page: Page, query: Query, trx?: Transaction) {
+  protected async findIdSortList (finger: Dic<any>[], pager: Pager, query: Query, trx?: Transaction) {
     const cacheNsp = this.getCacheNsp('data')
-    const cacheId = `page:${page.rows}:${page.last}:` + secure.sha1($.sortQueryString(...finger))
-    return await cache.warp(cacheNsp, cacheId, () => super.selectIdPageList(page, query, trx))
+    const cacheId = `sort-list:${pager.rows}:${pager.last}:` + secure.sha1($.sortQueryString(...finger))
+    return await cache.warp(cacheNsp, cacheId, () => super.selectIdSortList(pager, query, trx))
+  }
+
+  protected async findIdViewList (finger: Dic<any>[], pager: Pager, query: Query, trx?: Transaction) {
+    const cacheNsp = this.getCacheNsp('data')
+    const cacheId = `view-list:${pager.rows}:${pager.page}:` + secure.sha1($.sortQueryString(...finger))
+    const count = await this.findListCount(finger, query, trx)
+    return await cache.warp(cacheNsp, cacheId, () => super.selectIdViewList(pager, query, trx, count))
   }
 
   protected async mGetCountBy (field: string, ids: string[], trx?: Transaction) {
