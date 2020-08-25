@@ -104,6 +104,13 @@ export class MysqlNative<Scheme> {
     return result || 0
   }
 
+  // 通过ID批量更新
+  async updateByIds (ids: string[], data: Partial<Scheme>, trx?: Transaction) {
+    _.defaults(data, { updated: _.now() })
+    const result = await this.table(trx).whereIn(this.key, ids).update(this.fill(data))
+    return result || 0
+  }
+
   // 通过查询条件更新
   async updateForQueryById (id: string, query: Query, data: Partial<Scheme>, trx?: Transaction) {
     _.defaults(data, { updated: _.now() })

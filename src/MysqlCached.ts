@@ -27,6 +27,14 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
     return result
   }
 
+  async updateByIds (ids: string[], data: SafePartial<Scheme>, trx?: Transaction) {
+    const dataList = await this.getCacheChangedDataList(ids, data, trx)
+    const result = await super.updateByIds(ids, data, trx)
+    if (result)
+      await this.deleteCache(ids, dataList)
+    return result
+  }
+
   async updateForQueryById (id: string, query: Query, data: SafePartial<Scheme>, trx?: Transaction) {
     const dataList = await this.getCacheChangedDataList([id], data, trx)
     const result = await super.updateForQueryById(id, query, data, trx)
