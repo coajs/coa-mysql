@@ -198,12 +198,12 @@ export class MysqlNative<Scheme> {
   // 查询ID格式Sort列表
   protected async selectIdSortList (pager: Pager, query: Query, trx?: Transaction) {
 
-    let { last, rows, more } = this.checkSortPager(pager)
+    let { last, rows, more, ext } = this.checkSortPager(pager)
 
     const qb = this.table(trx).select(this.name + '.' + this.key)
     query(qb)
-    qb.limit(rows + 1).offset(last)
-    qb.orderBy(this.name + '.' + this.increment, 'desc')
+    ext.ignoreLimit || qb.limit(rows + 1).offset(last)
+    ext.ignoreOrder || qb.orderBy(this.name + '.' + this.increment, 'desc')
     const list = await qb as Scheme[]
 
     if (list.length === rows + 1) {
@@ -236,11 +236,11 @@ export class MysqlNative<Scheme> {
 
   // 检查分页参数
   protected checkSortPager (pager: Pager) {
-    let last = pager.last, rows = pager.rows, more = false as boolean
+    let last = pager.last, rows = pager.rows, more = false as boolean, ext = pager.ext || {}
     if (last < 0) last = 0
     if (rows < 1) die.hint('pager rows 参数有误')
     else if (rows > MaxPageRows) rows = MaxPageRows
-    return { last, rows, more }
+    return { last, rows, more, ext }
   }
 
   // 检查View分页参数
