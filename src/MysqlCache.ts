@@ -1,11 +1,20 @@
-import { die } from 'coa-error'
-import { $, _ } from 'coa-helper'
-import { cache } from 'coa-redis'
-import { secure } from 'coa-secure'
 import { MysqlNative } from './MysqlNative'
-import { Dic, Pager, Query, SafePartial, Transaction } from './typings'
+import { RedisCache } from 'coa-redis'
+import { MysqlBin } from './MysqlBin'
+import { Dic, ModelOption, Pager, Query, SafePartial, Transaction } from './typings'
+import { die } from 'coa-error'
+import { secure } from 'coa-secure'
+import { $, _ } from 'coa-helper'
+import { CacheDelete } from 'coa-redis/typings'
 
-export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
+export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
+
+  redisCache: RedisCache
+
+  constructor (option: ModelOption<Scheme>, bin: MysqlBin, redisCache: RedisCache) {
+    super(option, bin)
+    this.redisCache = redisCache
+  }
 
   async insert (data: SafePartial<Scheme>, trx?: Transaction) {
     const id = await super.insert(data, trx)
@@ -63,16 +72,16 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
   }
 
   async getById (id: string, pick = this.columns, trx?: Transaction, ms = this.ms, force = false) {
-    const result = await cache.warp(this.getCacheNsp('id'), id, () => super.getById(id, this.columns, trx), ms, force)
+    const result = await this.redisCache.warp(this.getCacheNsp('id'), id, () => super.getById(id, this.columns, trx), ms, force)
     return this.pickResult(result, pick)
   }
 
   async getIdBy (field: string, value: string | number, trx?: Transaction) {
-    return await cache.warp(this.getCacheNsp('index', field), '' + value, () => super.getIdBy(field, value, trx))
+    return await this.redisCache.warp(this.getCacheNsp('index', field), '' + value, () => super.getIdBy(field, value, trx))
   }
 
   async mGetByIds (ids: string[], pick = this.pick, trx?: Transaction, ms = this.ms, force = false) {
-    const result = await cache.mWarp(this.getCacheNsp('id'), ids, ids => super.mGetByIds(ids, this.columns, trx), ms, force)
+    const result = await this.redisCache.mWarp(this.getCacheNsp('id'), ids, ids => super.mGetByIds(ids, this.columns, trx), ms, force)
     _.forEach(result, (v, k) => result[k] = this.pickResult(v, pick))
     return result
   }
@@ -85,31 +94,31 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
   protected async findListCount (finger: Dic<any>[], query: Query, trx?: Transaction) {
     const cacheNsp = this.getCacheNsp('data')
     const cacheId = 'list-count:' + secure.sha1($.sortQueryString(...finger))
-    return await cache.warp(cacheNsp, cacheId, () => super.selectListCount(query, trx))
+    return await this.redisCache.warp(cacheNsp, cacheId, () => super.selectListCount(query, trx))
   }
 
   protected async findIdList (finger: Dic<any>[], query: Query, trx?: Transaction) {
     const cacheNsp = this.getCacheNsp('data')
     const cacheId = 'list:' + secure.sha1($.sortQueryString(...finger))
-    return await cache.warp(cacheNsp, cacheId, () => super.selectIdList(query, trx))
+    return await this.redisCache.warp(cacheNsp, cacheId, () => super.selectIdList(query, trx))
   }
 
   protected async findIdSortList (finger: Dic<any>[], pager: Pager, query: Query, trx?: Transaction) {
     const cacheNsp = this.getCacheNsp('data')
     const cacheId = `sort-list:${pager.rows}:${pager.last}:` + secure.sha1($.sortQueryString(...finger))
-    return await cache.warp(cacheNsp, cacheId, () => super.selectIdSortList(pager, query, trx))
+    return await this.redisCache.warp(cacheNsp, cacheId, () => super.selectIdSortList(pager, query, trx))
   }
 
   protected async findIdViewList (finger: Dic<any>[], pager: Pager, query: Query, trx?: Transaction) {
     const cacheNsp = this.getCacheNsp('data')
     const cacheId = `view-list:${pager.rows}:${pager.page}:` + secure.sha1($.sortQueryString(...finger))
     const count = await this.findListCount(finger, query, trx)
-    return await cache.warp(cacheNsp, cacheId, () => super.selectIdViewList(pager, query, trx, count))
+    return await this.redisCache.warp(cacheNsp, cacheId, () => super.selectIdViewList(pager, query, trx, count))
   }
 
   protected async mGetCountBy (field: string, ids: string[], trx?: Transaction) {
     const cacheNsp = this.getCacheNsp('count', field)
-    return await cache.mWarp(cacheNsp, ids, async ids => {
+    return await this.redisCache.mWarp(cacheNsp, ids, async ids => {
       const rows = await this.table(trx).select({ id: field }).count({ count: this.key }).whereIn(field, ids).groupBy(field) as any[]
       const result = {} as Dic<number>
       _.forEach(rows, ({ id, count }) => result[id] = count)
@@ -119,7 +128,7 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
 
   protected async getCountBy (field: string, value: string, query?: Query, trx?: Transaction) {
     const cacheNsp = this.getCacheNsp('count', field)
-    return await cache.warp(cacheNsp, value, async () => {
+    return await this.redisCache.warp(cacheNsp, value, async () => {
       const qb = this.table(trx).count({ count: this.key })
       query ? query(qb) : qb.where(field, value)
       const rows = await qb
@@ -167,6 +176,6 @@ export class MysqlCached<Scheme> extends MysqlNative<Scheme> {
         ids.length && deleteIds.push([this.getCacheNsp(name, key), ids])
       })
     })
-    await cache.mDelete(deleteIds)
+    await this.redisCache.mDelete(deleteIds)
   }
 }

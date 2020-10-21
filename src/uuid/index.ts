@@ -1,39 +1,34 @@
 import { _, HashIds } from 'coa-helper'
-import bin from './bin'
+import { Transaction } from 'knex'
+import { MysqlBin } from '../MysqlBin'
+import lock from './lock'
 
 const hexIds = new HashIds('UUID-HEX', 12, '0123456789abcdef')
 const hashIds = new HashIds('UUID-HASH', 12, '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
 const store = { key1: 0, key2: 0, key3: 0, lock: false }
 
+const TableName = 'aac_uuid'
+
 // hexIds进位阈值为 11 121 1331 14641 161051 1771561 19487171
 // key3每次添加10000冗余进位，key1每天变化
-const durationKey1 = 24 * 3600 * 1000, maxKey3 = 161051 - 14641 - 10000
+const durationKey1 = 24 * 3600 * 1000, maxKey3 = 161051 - 11
 
-export default new class {
+export class MysqlUuid {
 
-  async init () {
-    // 如果已经在执行，就忽略
-    if (store.lock)
-      return
-    store.lock = true
-    store.key1 = this.getKey1()
-    store.key2 = await bin.newDailySeries(store.key1)
-    store.lock = false
+  bin: MysqlBin
+
+  constructor (bin: MysqlBin) {
+    this.bin = bin
   }
 
   async series (key: string) {
-    return await bin.newSeries(key)
+    return await this.newSeries(key)
   }
 
   async saltId () {
-    // 预保存数据
-    const result = [store.key1, store.key2, ++store.key3]
-    // 某些时机下会异步更新
-    if (store.key3 > maxKey3 || store.key1 !== this.getKey1()) {
+    if (this.isNeedInit())
       await this.init()
-    }
-    // 返回结果
-    return result
+    return [store.key1, store.key2, ++store.key3]
   }
 
   async hexId () {
@@ -50,9 +45,54 @@ export default new class {
     return hashIds.encode(saltId)
   }
 
-  private getKey1 () {
+  // 每日唯一顺序码的ID
+  protected getDailyId (day: number) {
+    const id = '000000' + day
+    return 'ID' + id.substr(-5)
+  }
+
+  protected getKey1 () {
     // 当前时间减去2020年01月01日(1577808000000)，保证36年内(2056年)不会进位
     return _.toInteger((_.now() - 1577808000000) / durationKey1)
+  }
+
+  protected isNeedInit () {
+    return store.key2 === 0 || store.key3 > maxKey3 - 1 || store.key1 !== this.getKey1()
+  }
+
+  private async init () {
+    await lock.start('uuid-init', async () => {
+      if (!this.isNeedInit())
+        return
+      store.key1 = this.getKey1()
+      store.key2 = await this.getNewDailySeries(store.key1)
+      store.key3 = 0
+    })
+  }
+
+  // 生成新的唯一顺序码
+  private async newSeries (id: string) {
+    if (!this.bin.config.host) return 0
+    return await this.bin.io.transaction(async (trx: Transaction) => {
+      const data = await trx(TableName).first('no').where({ id }).forUpdate() || {}
+      const no = _.toInteger(data.no) + 1
+      if (no === 1)
+        await trx(TableName).insert({ id, no })
+      else
+        await trx(TableName).update({ no }).where({ id })
+      return no
+    })
+  }
+
+  // 生成每日唯一顺序码
+  private async getNewDailySeries (day: number) {
+    const id = this.getDailyId(day)
+    const series = await this.newSeries(id)
+    // 如果为1，则删除以前的旧数据
+    if (series === 1) await this.bin.io(TableName).delete()
+      .where('id', 'LIKE', 'ID%')
+      .where('id', '<', this.getDailyId(day - 3))
+    return series
   }
 
 }

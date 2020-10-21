@@ -19,7 +19,7 @@ export type ModelOption<T> = {
   caches?: { index?: string[], count?: string[] },
 }
 
-export interface MysqlEnv {
+export interface MysqlConfig {
   host: string
   port: number
   user: string
@@ -30,10 +30,4 @@ export interface MysqlEnv {
   }
   debug: boolean
   trace: boolean
-}
-
-declare module 'coa-env' {
-  interface Env {
-    mysql: MysqlEnv
-  }
 }

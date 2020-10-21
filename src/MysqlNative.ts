@@ -1,13 +1,9 @@
-import { env } from 'coa-env'
-import { die } from 'coa-error'
-import { _ } from 'coa-helper'
-import mysql from './mysql'
+import { MysqlBin } from './MysqlBin'
 import { Dic, ModelOption, Pager, Query, Transaction } from './typings'
-import uuid from './uuid'
+import { _ } from 'coa-helper'
+import { die } from 'coa-error'
 
 const MaxPageRows = 2000
-const Databases = env.mysql.databases
-const suffix = env.isOnline ? '' : env.runEnv
 
 export class MysqlNative<Scheme> {
 
@@ -26,8 +22,11 @@ export class MysqlNative<Scheme> {
   protected readonly columns = [] as string[]
   protected readonly jsons = [] as string[]
   protected readonly virtual = [] as string[]
+  protected readonly bin: MysqlBin
 
-  constructor (option: ModelOption<Scheme>) {
+  constructor (option: ModelOption<Scheme>, bin: MysqlBin) {
+    this.bin = bin
+
     // 处理基本数据
     this.name = _.snakeCase(option.name)
     this.title = option.title || _.startCase(this.name)
@@ -37,7 +36,7 @@ export class MysqlNative<Scheme> {
 
     // 处理database
     this.system = option.system || 'main'
-    const database = Databases[this.system] || die.hint(`MySQL错误: 缺少${this.system}系统数据库配置`)
+    const database = this.bin.config.databases[this.system] || die.hint(`MySQL错误: 缺少${this.system}系统数据库配置`)
     this.database = database.database || die.hint(`MySQL错误: 缺少${this.system}系统database配置`)
     this.ms = database.ms || die.hint(`MySQL错误: 缺少${this.system}系统ms配置`)
 
@@ -64,7 +63,8 @@ export class MysqlNative<Scheme> {
 
   // 获取ID
   public async newId () {
-    return this.prefix + await uuid.hexId() + suffix
+    die.hint('尚未实现newId()方法')
+    return '' as string
   }
 
   // 插入
@@ -127,7 +127,7 @@ export class MysqlNative<Scheme> {
     const result = await this.table(trx).where({ [this.key]: id }).update(this.fill(data))
     if (result === 0) {
       _.defaults(data, { [this.key]: id, created: time })
-      const a = this.fill(data, true)
+      this.fill(data, true)
       await this.table(trx).insert(this.fill(data, true))
     }
     return result
@@ -167,7 +167,7 @@ export class MysqlNative<Scheme> {
 
   // 获取table对象
   table (trx?: Transaction) {
-    const table = mysql.io<Scheme>(this.name).withSchema(this.database)
+    const table = this.bin.io<Scheme>(this.name).withSchema(this.database)
     trx && table.transacting(trx)
     return table
   }

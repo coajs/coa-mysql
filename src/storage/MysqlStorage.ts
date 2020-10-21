@@ -1,4 +1,6 @@
-import { MysqlCached } from '../MysqlCached'
+import { RedisCache } from 'coa-redis'
+import { MysqlBin } from '../MysqlBin'
+import { MysqlCache } from '../MysqlCache'
 
 const scheme = {
   key: '' as string,
@@ -7,10 +9,10 @@ const scheme = {
 }
 const pick = ['key', 'value', 'expire']
 
-export default new class extends MysqlCached<typeof scheme> {
+export class MysqlStorage extends MysqlCache<typeof scheme> {
 
-  constructor () {
-    super({ name: 'AacStorage', scheme, pick })
+  constructor (bin: MysqlBin, cache: RedisCache) {
+    super({ name: 'AacStorage', scheme, pick }, bin, cache)
   }
 
   async get<T> (key: string) {
@@ -33,10 +35,4 @@ export default new class extends MysqlCached<typeof scheme> {
     }
     return result
   }
-
-  define = <T> (key: string, _ms = 0) => ({
-    get: () => this.get<T>(key),
-    set: (value: T, ms = _ms) => this.set(key, value, ms),
-    warp: (worker: () => Promise<T>, ms = _ms) => this.warp(key, worker, ms),
-  })
 }
