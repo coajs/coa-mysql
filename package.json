@@ -1,6 +1,6 @@
 {
   "name": "coa-mysql",
-  "version": "1.2.12",
+  "version": "1.2.13-0",
   "description": "Mysql component for coa",
   "keywords": [
     "coajs",
@@ -17,9 +17,8 @@
   "scripts": {
     "dev": "tsc -w",
     "build": "rm -rf dist && tsc && cp package.json dist",
-    "publish-patch": "yarn build && yarn version --patch && cp package.json README.md dist && cd dist && npm publish",
-    "publish-prerelease": "yarn build && yarn version --prerelease && cp package.json README.md dist && cd dist && npm publish",
-    "npm-publish": "yarn build && yarn version --patch && cp package.json README.md dist && cd dist && rm -rf @* && npm publish",
+    "publish-patch": "yarn build && yarn version --patch && cp package.json README.md dist && cd dist && rm -rf @* && npm publish",
+    "publish-prerelease": "yarn build && yarn version --prerelease && cp package.json README.md dist && cd dist && rm -rf @* && npm publish",
     "test": "NODE_PATH=run node dist/@test"
   },
   "dependencies": {

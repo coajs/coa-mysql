@@ -166,7 +166,7 @@ coa-helper@^1.0.6:
 
 coa-redis@^1.2.1-1:
   version "1.2.1-1"
-  resolved "https://registry.npm.taobao.org/coa-redis/download/coa-redis-1.2.1-1.tgz?cache=0&sync_timestamp=1603959828602&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fcoa-redis%2Fdownload%2Fcoa-redis-1.2.1-1.tgz#e7c323e58154f6355ddb1c491cce028596dc85ab"
+  resolved "https://registry.npm.taobao.org/coa-redis/download/coa-redis-1.2.1-1.tgz#e7c323e58154f6355ddb1c491cce028596dc85ab"
   integrity sha1-58Mj5YFU9jVd2xxJHM4ChZbchas=
   dependencies:
     "@types/ioredis" "^4.17.6"
