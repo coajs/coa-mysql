@@ -11,19 +11,17 @@ const TableName = 'aac_uuid'
 
 // hexIds进位阈值为 11 121 1331 14641 161051 1771561 19487171
 // key3每次添加10000冗余进位，key1每天变化
-const durationKey1 = 24 * 3600 * 1000
-
 const maxStep = 161051 - 11
 
 export class MysqlUuid {
 
   bin: MysqlBin
-  prefix: string
+  name: string
   step: number
 
-  constructor (bin: MysqlBin, prefix: string, step = maxStep) {
+  constructor (bin: MysqlBin, name: string = 'ID', step = maxStep) {
     this.bin = bin
-    this.prefix = prefix
+    this.name = name.toUpperCase()
     this.step = step
   }
 
@@ -54,16 +52,17 @@ export class MysqlUuid {
   // 每日唯一顺序码的ID
   protected getDailyId (day: number) {
     const id = '000000' + day
-    return 'ID' + id.substr(-5)
+    return `${this.name}${id.substr(-5)}`
   }
 
   protected getKey1 () {
     // 当前时间减去2020年01月01日(1577808000000)，保证36年内(2056年)不会进位
-    return _.toInteger((_.now() - 1577808000000) / durationKey1)
+    // 每天 24 * 3600 * 1000 =  86400000 毫秒,
+    return _.toInteger((_.now() - 1577808000000) / 86400000)
   }
 
   protected isNeedInit () {
-    return store.key2 === 0 || store.key3 > this.step - 1 || store.key1 !== this.getKey1()
+    return store.key2 === 0 || store.key3 >= this.step || store.key1 !== this.getKey1()
   }
 
   private async init () {
@@ -96,8 +95,8 @@ export class MysqlUuid {
     const series = await this.newSeries(id)
     // 如果为1，则删除以前的旧数据
     if (series === 1) await this.bin.io(TableName).delete()
-      .where('id', 'LIKE', `${this.prefix}%`)
-      .where('id', '<', this.getDailyId(day - 3))
+      .where('id', 'LIKE', `${this.name}%`)
+      .where('id', '<=', this.getDailyId(day - 3))
     return series
   }
 
