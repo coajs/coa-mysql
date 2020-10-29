@@ -35,4 +35,11 @@ export class MysqlStorage extends MysqlCache<typeof scheme> {
     }
     return result
   }
+
+  define = <T> (key: string, _ms = 0) => ({
+    get: () => this.get<T>(key),
+    set: (value: T, ms = _ms) => this.set(key, value, ms),
+    warp: (worker: () => Promise<T>, ms = _ms) => this.warp(key, worker, ms),
+  })
+  
 }
