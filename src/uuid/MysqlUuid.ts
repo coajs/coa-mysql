@@ -5,8 +5,6 @@ import lock from './helper/lock'
 
 const hexIds = new HashIds('UUID-HEX', 12, '0123456789abcdef')
 const hashIds = new HashIds('UUID-HASH', 12, '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
-const store = { key1: 0, key2: 0, key3: 0, lock: false }
-
 const TableName = 'aac_uuid'
 
 // hexIds进位阈值为 11 121 1331 14641 161051 1771561 19487171
@@ -15,9 +13,13 @@ const maxStep = 161051 - 11
 
 export class MysqlUuid {
 
-  bin: MysqlBin
-  name: string
-  step: number
+  private readonly bin: MysqlBin
+  private readonly name: string
+  private readonly step: number
+
+  private key1 = 0
+  private key2 = 0
+  private key3 = 0
 
   constructor (bin: MysqlBin, name: string = 'ID', step = maxStep) {
     this.bin = bin
@@ -32,7 +34,7 @@ export class MysqlUuid {
   async saltId () {
     if (this.isNeedInit())
       await this.init()
-    return [store.key1, store.key2, ++store.key3]
+    return [this.key1, this.key2, ++this.key3]
   }
 
   async hexId () {
@@ -61,17 +63,17 @@ export class MysqlUuid {
     return _.toInteger((_.now() - 1577808000000) / 86400000)
   }
 
-  protected isNeedInit () {
-    return store.key2 === 0 || store.key3 >= this.step || store.key1 !== this.getKey1()
+  private isNeedInit () {
+    return this.key2 === 0 || this.key3 >= this.step || this.key1 !== this.getKey1()
   }
 
   private async init () {
     await lock.start('uuid-init', async () => {
       if (!this.isNeedInit())
         return
-      store.key1 = this.getKey1()
-      store.key2 = await this.getNewDailySeries(store.key1)
-      store.key3 = 0
+      this.key1 = this.getKey1()
+      this.key2 = await this.getNewDailySeries(this.key1)
+      this.key3 = 0
     })
   }
 
