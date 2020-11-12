@@ -1,11 +1,11 @@
-import { MysqlNative } from './MysqlNative'
-import { RedisCache } from 'coa-redis'
-import { MysqlBin } from './MysqlBin'
-import { Dic, ModelOption, Pager, Query, SafePartial, Transaction } from './typings'
-import { die } from 'coa-error'
-import { secure } from 'coa-secure'
+import { CoaError } from 'coa-error'
 import { $, _ } from 'coa-helper'
+import { RedisCache } from 'coa-redis'
 import { CacheDelete } from 'coa-redis/typings'
+import { secure } from 'coa-secure'
+import { MysqlBin } from './MysqlBin'
+import { MysqlNative } from './MysqlNative'
+import { Dic, ModelOption, Pager, Query, SafePartial, Transaction } from './typings'
 
 export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
 
@@ -68,7 +68,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
   }
 
   async checkById (id: string, pick = this.columns, trx?: Transaction, ms = this.ms, force = false) {
-    return await this.getById(id, pick, trx, ms, force) || die.hint(`${this.title}不存在`)
+    return await this.getById(id, pick, trx, ms, force) || CoaError.throw('MysqlCache.DataNotFound', `${this.title}不存在`)
   }
 
   async getById (id: string, pick = this.columns, trx?: Transaction, ms = this.ms, force = false) {

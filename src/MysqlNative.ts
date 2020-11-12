@@ -1,7 +1,7 @@
+import { CoaError } from 'coa-error'
+import { _ } from 'coa-helper'
 import { MysqlBin } from './MysqlBin'
 import { Dic, ModelOption, Pager, Query, Transaction } from './typings'
-import { _ } from 'coa-helper'
-import { die } from 'coa-error'
 
 const MaxPageRows = 2000
 
@@ -30,15 +30,15 @@ export class MysqlNative<Scheme> {
     // 处理基本数据
     this.name = _.snakeCase(option.name)
     this.title = option.title || _.startCase(this.name)
-    this.scheme = option.scheme || die.hint(`MySQL错误: ${this.name}模型缺少scheme`)
+    this.scheme = option.scheme || CoaError.throw('MysqlNative.SchemeMissing', `MySQL错误: ${this.name}模型缺少scheme`)
     this.prefix = option.prefix || option.name.substr(0, 3).toLowerCase()
     this.increment = option.increment || 'id'
 
     // 处理database
     this.system = option.system || 'main'
-    const database = this.bin.config.databases[this.system] || die.hint(`MySQL错误: 缺少${this.system}系统数据库配置`)
-    this.database = database.database || die.hint(`MySQL错误: 缺少${this.system}系统database配置`)
-    this.ms = database.ms || die.hint(`MySQL错误: 缺少${this.system}系统ms配置`)
+    const database = this.bin.config.databases[this.system] || CoaError.throw('MysqlNative.ConfigMissing', `MySQL错误: 缺少${this.system}系统数据库配置`)
+    this.database = database.database || CoaError.throw('MysqlNative.ConfigMissing', `MySQL错误: 缺少${this.system}系统database配置`)
+    this.ms = database.ms || CoaError.throw('MysqlNative.ConfigMissing', `MySQL错误: 缺少${this.system}系统ms配置`)
 
     // 处理caches
     this.caches = _.defaults(option.caches, { index: [], count: [] })
@@ -63,7 +63,7 @@ export class MysqlNative<Scheme> {
 
   // 获取ID
   public async newId () {
-    die.hint('尚未实现newId()方法')
+    CoaError.throw('MysqlNative.NewIdMethodNotImplement', '尚未实现newId()方法')
     return '' as string
   }
 
@@ -82,7 +82,7 @@ export class MysqlNative<Scheme> {
   // 批量插入
   async mInsert (dataList: Partial<Scheme>[], trx?: Transaction) {
     const time = _.now()
-    const values = [] as any[]
+    const values = [] as any
     const ids = [] as string[]
     for (const i in dataList) {
       const data = dataList[i] as any
@@ -237,7 +237,7 @@ export class MysqlNative<Scheme> {
   protected checkSortPager (pager: Pager) {
     let last = pager.last, rows = pager.rows, more = false as boolean, ext = pager.ext || {}
     if (last < 0) last = 0
-    if (rows < 1) die.hint('pager rows 参数有误')
+    if (rows < 1) CoaError.throw('MysqlNative.PagerRowsInvalid', 'pager rows 参数有误')
     else if (rows > MaxPageRows) rows = MaxPageRows
     return { last, rows, more, ext }
   }
@@ -245,7 +245,7 @@ export class MysqlNative<Scheme> {
   // 检查View分页参数
   protected checkViewPager (pager: Pager, count: number) {
     let rows = pager.rows, page = pager.page
-    if (rows < 1) die.hint('pager rows 参数有误')
+    if (rows < 1) CoaError.throw('MysqlNative.PagerRowsInvalid', 'pager rows 参数有误')
     else if (rows > MaxPageRows) rows = MaxPageRows
     let pageMax = _.ceil(count / rows)
     if (page > pageMax) page = pageMax

@@ -1,6 +1,6 @@
 {
   "name": "coa-mysql",
-  "version": "1.2.13-4",
+  "version": "1.2.14",
   "description": "Mysql component for coa",
   "keywords": [
     "coajs",
@@ -22,15 +22,15 @@
     "test": "NODE_PATH=run node dist/@test"
   },
   "dependencies": {
-    "knex": "^0.21.2",
+    "knex": "^0.21.12",
     "mysql": "^2.18.1"
   },
   "devDependencies": {
-    "@types/node": "^14.14.6",
+    "@types/node": "^14.14.7",
     "coa-echo": "^1.0.8",
-    "coa-error": "^1.0.4",
+    "coa-error": "^1.1.2",
     "coa-helper": "^1.0.6",
-    "coa-redis": "^1.2.1-1",
+    "coa-redis": "^1.2.1",
     "coa-secure": "^1.0.3",
     "typescript": "^4.0.5"
   },

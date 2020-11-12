@@ -1,5 +1,5 @@
 import { echo } from 'coa-echo'
-import { die } from 'coa-error'
+import { CoaError } from 'coa-error'
 import Knex from './Knex'
 import { MysqlConfig } from './typings'
 
@@ -11,7 +11,7 @@ export class MysqlBin {
   constructor (config: MysqlConfig) {
 
     // 创建数据库连接
-    const mysql_env_main = config.databases.main || die.hint('缺少主数据库配置')
+    const mysql_env_main = config.databases.main || CoaError.throw('MysqlBin.ConfigMissing', '缺少主数据库配置')
     const { host, port, user, password, charset, debug } = config
     const database = mysql_env_main.database
 
@@ -20,7 +20,7 @@ export class MysqlBin {
 
     io.on('query-error', (error: any) => {
       echo.error(error)
-      die.hint(error.sqlMessage, 400, error.errno + ': ' + error.code)
+      CoaError.throw('MysqlBin.Error.' + error.errno + '. ' + error.code, error.sqlMessage)
     })
 
     config.trace && io.on('query', (data: any) => {
