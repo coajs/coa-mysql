@@ -1,34 +1,33 @@
 import { CoaError } from 'coa-error'
 import { $, _ } from 'coa-helper'
-import { RedisCache } from 'coa-redis'
-import { CacheDelete } from 'coa-redis/typings'
+import { CoaRedis, RedisCache } from 'coa-redis'
 import { secure } from 'coa-secure'
 import { MysqlBin } from './MysqlBin'
 import { MysqlNative } from './MysqlNative'
-import { Dic, ModelOption, Pager, Query, SafePartial, Transaction } from './typings'
+import { CoaMysql } from './typings'
 
 export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
 
   redisCache: RedisCache
 
-  constructor (option: ModelOption<Scheme>, bin: MysqlBin, redisCache: RedisCache) {
+  constructor (option: CoaMysql.ModelOption<Scheme>, bin: MysqlBin, redisCache: RedisCache) {
     super(option, bin)
     this.redisCache = redisCache
   }
 
-  async insert (data: SafePartial<Scheme>, trx?: Transaction) {
+  async insert (data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const id = await super.insert(data, trx)
     await this.deleteCache([id], [data])
     return id
   }
 
-  async mInsert (dataList: SafePartial<Scheme>[], trx?: Transaction) {
+  async mInsert (dataList: CoaMysql.SafePartial<Scheme>[], trx?: CoaMysql.Transaction) {
     const ids = await super.mInsert(dataList, trx)
     await this.deleteCache(ids, dataList)
     return ids
   }
 
-  async updateById (id: string, data: SafePartial<Scheme>, trx?: Transaction) {
+  async updateById (id: string, data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList([id], data, trx)
     const result = await super.updateById(id, data, trx)
     if (result)
@@ -36,7 +35,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
     return result
   }
 
-  async updateByIds (ids: string[], data: SafePartial<Scheme>, trx?: Transaction) {
+  async updateByIds (ids: string[], data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList(ids, data, trx)
     const result = await super.updateByIds(ids, data, trx)
     if (result)
@@ -44,7 +43,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
     return result
   }
 
-  async updateForQueryById (id: string, query: Query, data: SafePartial<Scheme>, trx?: Transaction) {
+  async updateForQueryById (id: string, query: CoaMysql.Query, data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList([id], data, trx)
     const result = await super.updateForQueryById(id, query, data, trx)
     if (result)
@@ -52,14 +51,14 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
     return result
   }
 
-  async upsertById (id: string, data: SafePartial<Scheme>, trx?: Transaction) {
+  async upsertById (id: string, data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList([id], data, trx)
     const result = await super.upsertById(id, data, trx)
     await this.deleteCache([id], dataList)
     return result
   }
 
-  async deleteByIds (ids: string[], trx?: Transaction) {
+  async deleteByIds (ids: string[], trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList(ids, undefined, trx)
     const result = await super.deleteByIds(ids, trx)
     if (result)
@@ -67,66 +66,66 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
     return result
   }
 
-  async checkById (id: string, pick = this.columns, trx?: Transaction, ms = this.ms, force = false) {
+  async checkById (id: string, pick = this.columns, trx?: CoaMysql.Transaction, ms = this.ms, force = false) {
     return await this.getById(id, pick, trx, ms, force) || CoaError.throw('MysqlCache.DataNotFound', `${this.title}不存在`)
   }
 
-  async getById (id: string, pick = this.columns, trx?: Transaction, ms = this.ms, force = false) {
+  async getById (id: string, pick = this.columns, trx?: CoaMysql.Transaction, ms = this.ms, force = false) {
     const result = await this.redisCache.warp(this.getCacheNsp('id'), id, () => super.getById(id, this.columns, trx), ms, force)
     return this.pickResult(result, pick)
   }
 
-  async getIdBy (field: string, value: string | number, trx?: Transaction) {
+  async getIdBy (field: string, value: string | number, trx?: CoaMysql.Transaction) {
     return await this.redisCache.warp(this.getCacheNsp('index', field), '' + value, () => super.getIdBy(field, value, trx))
   }
 
-  async mGetByIds (ids: string[], pick = this.pick, trx?: Transaction, ms = this.ms, force = false) {
+  async mGetByIds (ids: string[], pick = this.pick, trx?: CoaMysql.Transaction, ms = this.ms, force = false) {
     const result = await this.redisCache.mWarp(this.getCacheNsp('id'), ids, ids => super.mGetByIds(ids, this.columns, trx), ms, force)
     _.forEach(result, (v, k) => result[k] = this.pickResult(v, pick))
     return result
   }
 
-  async truncate (trx?: Transaction) {
+  async truncate (trx?: CoaMysql.Transaction) {
     await super.truncate(trx)
     await this.deleteCache([], [])
   }
 
-  protected async findListCount (finger: Dic<any>[], query: Query, trx?: Transaction) {
+  protected async findListCount (finger: CoaMysql.Dic<any>[], query: CoaMysql.Query, trx?: CoaMysql.Transaction) {
     const cacheNsp = this.getCacheNsp('data')
     const cacheId = 'list-count:' + secure.sha1($.sortQueryString(...finger))
     return await this.redisCache.warp(cacheNsp, cacheId, () => super.selectListCount(query, trx))
   }
 
-  protected async findIdList (finger: Dic<any>[], query: Query, trx?: Transaction) {
+  protected async findIdList (finger: CoaMysql.Dic<any>[], query: CoaMysql.Query, trx?: CoaMysql.Transaction) {
     const cacheNsp = this.getCacheNsp('data')
     const cacheId = 'list:' + secure.sha1($.sortQueryString(...finger))
     return await this.redisCache.warp(cacheNsp, cacheId, () => super.selectIdList(query, trx))
   }
 
-  protected async findIdSortList (finger: Dic<any>[], pager: Pager, query: Query, trx?: Transaction) {
+  protected async findIdSortList (finger: CoaMysql.Dic<any>[], pager: CoaMysql.Pager, query: CoaMysql.Query, trx?: CoaMysql.Transaction) {
     const cacheNsp = this.getCacheNsp('data')
     const cacheId = `sort-list:${pager.rows}:${pager.last}:` + secure.sha1($.sortQueryString(...finger))
     return await this.redisCache.warp(cacheNsp, cacheId, () => super.selectIdSortList(pager, query, trx))
   }
 
-  protected async findIdViewList (finger: Dic<any>[], pager: Pager, query: Query, trx?: Transaction) {
+  protected async findIdViewList (finger: CoaMysql.Dic<any>[], pager: CoaMysql.Pager, query: CoaMysql.Query, trx?: CoaMysql.Transaction) {
     const cacheNsp = this.getCacheNsp('data')
     const cacheId = `view-list:${pager.rows}:${pager.page}:` + secure.sha1($.sortQueryString(...finger))
     const count = await this.findListCount(finger, query, trx)
     return await this.redisCache.warp(cacheNsp, cacheId, () => super.selectIdViewList(pager, query, trx, count))
   }
 
-  protected async mGetCountBy (field: string, ids: string[], trx?: Transaction) {
+  protected async mGetCountBy (field: string, ids: string[], trx?: CoaMysql.Transaction) {
     const cacheNsp = this.getCacheNsp('count', field)
     return await this.redisCache.mWarp(cacheNsp, ids, async ids => {
       const rows = await this.table(trx).select({ id: field }).count({ count: this.key }).whereIn(field, ids).groupBy(field) as any[]
-      const result = {} as Dic<number>
+      const result = {} as CoaMysql.Dic<number>
       _.forEach(rows, ({ id, count }) => result[id] = count)
       return result
-    }) as Promise<Dic<number>>
+    }) as Promise<CoaMysql.Dic<number>>
   }
 
-  protected async getCountBy (field: string, value: string, query?: Query, trx?: Transaction) {
+  protected async getCountBy (field: string, value: string, query?: CoaMysql.Query, trx?: CoaMysql.Transaction) {
     const cacheNsp = this.getCacheNsp('count', field)
     return await this.redisCache.warp(cacheNsp, value, async () => {
       const qb = this.table(trx).count({ count: this.key })
@@ -145,9 +144,9 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
     return this.system + ':' + this.name + ':' + nsp.join(':')
   }
 
-  protected async getCacheChangedDataList (ids: string[], data?: SafePartial<Scheme>, trx?: Transaction) {
+  protected async getCacheChangedDataList (ids: string[], data?: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     let has = true
-    const resultList = [] as SafePartial<Scheme>[]
+    const resultList = [] as CoaMysql.SafePartial<Scheme>[]
     if (data) {
       has = _.some(this.cachesFields, i => !!(data as any)[i])
       resultList.push(data)
@@ -159,8 +158,8 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
     return resultList
   }
 
-  protected async deleteCache (ids: string[], dataList: SafePartial<Scheme>[]) {
-    const deleteIds = [] as CacheDelete[]
+  protected async deleteCache (ids: string[], dataList: CoaMysql.SafePartial<Scheme>[]) {
+    const deleteIds = [] as CoaRedis.CacheDelete[]
     deleteIds.push([this.getCacheNsp('id'), ids])
     deleteIds.push([this.getCacheNsp('data'), []])
     _.forEach(this.caches, (items, name) => {

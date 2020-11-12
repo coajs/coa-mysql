@@ -151,10 +151,10 @@ coa-helper@^1.0.6:
     hashids "^2.2.1"
     lodash "^4.17.15"
 
-coa-redis@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.npm.taobao.org/coa-redis/download/coa-redis-1.2.1.tgz#bad9bf05dafd3c7fa2f0ff3e9385d3eeca8d2341"
-  integrity sha1-utm/Bdr9PH+i8P8+k4XT7sqNI0E=
+coa-redis@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.npm.taobao.org/coa-redis/download/coa-redis-1.2.2.tgz?cache=0&sync_timestamp=1605162542023&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fcoa-redis%2Fdownload%2Fcoa-redis-1.2.2.tgz#683bd78a2c70eefe75f2c55e5d6ae7497c16d5c1"
+  integrity sha1-aDvXiixw7v518sVeXWrnSXwW1cE=
   dependencies:
     "@types/ioredis" "^4.17.7"
     ioredis "^4.19.2"

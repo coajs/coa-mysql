@@ -1,14 +1,14 @@
 import { echo } from 'coa-echo'
 import { CoaError } from 'coa-error'
 import Knex from './Knex'
-import { MysqlConfig } from './typings'
+import { CoaMysql } from './typings'
 
 export class MysqlBin {
 
   public io: Knex
-  public config: MysqlConfig
+  public config: CoaMysql.Config
 
-  constructor (config: MysqlConfig) {
+  constructor (config: CoaMysql.Config) {
 
     // 创建数据库连接
     const mysql_env_main = config.databases.main || CoaError.throw('MysqlBin.ConfigMissing', '缺少主数据库配置')

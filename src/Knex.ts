@@ -1,13 +1,13 @@
 import { _ } from 'coa-helper'
 import * as Knex from 'knex'
-import { Dic } from './typings'
+import { CoaMysql } from './typings'
 
 declare module 'knex' {
   interface QueryBuilder {
 
     search<TRecord, TResult> (columns: string[], value: string): Knex.QueryBuilder<TRecord, TResult>
 
-    filter<TRecord, TResult> (data: Dic<string | number>, table?: string): Knex.QueryBuilder<TRecord, TResult>
+    filter<TRecord, TResult> (data: CoaMysql.Dic<string | number>, table?: string): Knex.QueryBuilder<TRecord, TResult>
 
     period<TRecord, TResult> (column: string, from: number, to: number): Knex.QueryBuilder<TRecord, TResult>
 
@@ -24,7 +24,7 @@ Knex.QueryBuilder.extend('search', function (columns: string[], value: string) {
   })
   return this
 })
-Knex.QueryBuilder.extend('filter', function (data: Dic<string | number>, table?: string) {
+Knex.QueryBuilder.extend('filter', function (data: CoaMysql.Dic<string | number>, table?: string) {
   data = _.pickBy(data)
   if (table) data = _.mapKeys(data, (v, k) => table + '.' + k)
   return this.where(data)

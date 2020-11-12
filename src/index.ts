@@ -1,7 +1,6 @@
 export { MysqlBin } from './MysqlBin'
 export { MysqlNative } from './MysqlNative'
 export { MysqlCache } from './MysqlCache'
-export { MysqlUuid } from './uuid/index'
+export { MysqlUuid } from './uuid/MysqlUuid'
 export { MysqlStorage } from './storage/MysqlStorage'
-export * from './typings'
-
+export { CoaMysql } from './typings'

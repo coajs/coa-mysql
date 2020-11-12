@@ -1,7 +1,7 @@
 import { CoaError } from 'coa-error'
 import { _ } from 'coa-helper'
 import { MysqlBin } from './MysqlBin'
-import { Dic, ModelOption, Pager, Query, Transaction } from './typings'
+import { CoaMysql } from './typings'
 
 const MaxPageRows = 2000
 
@@ -24,7 +24,7 @@ export class MysqlNative<Scheme> {
   protected readonly virtual = [] as string[]
   protected readonly bin: MysqlBin
 
-  constructor (option: ModelOption<Scheme>, bin: MysqlBin) {
+  constructor (option: CoaMysql.ModelOption<Scheme>, bin: MysqlBin) {
     this.bin = bin
 
     // 处理基本数据
@@ -68,7 +68,7 @@ export class MysqlNative<Scheme> {
   }
 
   // 插入
-  async insert (data: Partial<Scheme>, trx?: Transaction) {
+  async insert (data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
     // 设置主键ID
     const id = (data as any)[this.key] as string || await this.newId()
     // 设置时间数据
@@ -80,7 +80,7 @@ export class MysqlNative<Scheme> {
   }
 
   // 批量插入
-  async mInsert (dataList: Partial<Scheme>[], trx?: Transaction) {
+  async mInsert (dataList: Partial<Scheme>[], trx?: CoaMysql.Transaction) {
     const time = _.now()
     const values = [] as any
     const ids = [] as string[]
@@ -98,21 +98,21 @@ export class MysqlNative<Scheme> {
   }
 
   // 通过ID更新
-  async updateById (id: string, data: Partial<Scheme>, trx?: Transaction) {
+  async updateById (id: string, data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
     _.defaults(data, { updated: _.now() })
     const result = await this.table(trx).where({ [this.key]: id }).update(this.fill(data))
     return result || 0
   }
 
   // 通过ID批量更新
-  async updateByIds (ids: string[], data: Partial<Scheme>, trx?: Transaction) {
+  async updateByIds (ids: string[], data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
     _.defaults(data, { updated: _.now() })
     const result = await this.table(trx).whereIn(this.key, ids).update(this.fill(data))
     return result || 0
   }
 
   // 通过查询条件更新
-  async updateForQueryById (id: string, query: Query, data: Partial<Scheme>, trx?: Transaction) {
+  async updateForQueryById (id: string, query: CoaMysql.Query, data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
     _.defaults(data, { updated: _.now() })
     const qb = this.table(trx).where({ [this.key]: id })
     query(qb)
@@ -121,7 +121,7 @@ export class MysqlNative<Scheme> {
   }
 
   // 通过ID更新或插入
-  async upsertById (id: string, data: Partial<Scheme>, trx?: Transaction) {
+  async upsertById (id: string, data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
     const time = _.now()
     _.defaults(data, { updated: time })
     const result = await this.table(trx).where({ [this.key]: id }).update(this.fill(data))
@@ -133,20 +133,20 @@ export class MysqlNative<Scheme> {
   }
 
   // 通过ID删除多个
-  async deleteByIds (ids: string[], trx?: Transaction) {
+  async deleteByIds (ids: string[], trx?: CoaMysql.Transaction) {
     const result = await this.table(trx).whereIn(this.key, ids).delete()
     return result || 0
   }
 
   // 通过ID获取一个
-  async getById (id: string, pick = this.columns, trx?: Transaction) {
+  async getById (id: string, pick = this.columns, trx?: CoaMysql.Transaction) {
     const result = await this.table(trx).select(pick).where(this.key, id)
     return this.result(result[0], pick)
   }
 
   // 通过ID获取多个
-  async mGetByIds (ids: string[], pick = this.pick, trx?: Transaction) {
-    const result = {} as Dic<Scheme>
+  async mGetByIds (ids: string[], pick = this.pick, trx?: CoaMysql.Transaction) {
+    const result = {} as CoaMysql.Dic<Scheme>
     pick.indexOf(this.key) < 0 && pick.unshift(this.key)
     const rows = await this.table(trx).select(pick).whereIn(this.key, ids)
     rows.forEach((v: any) => {
@@ -160,26 +160,26 @@ export class MysqlNative<Scheme> {
   }
 
   // 截断表
-  async truncate (trx?: Transaction) {
+  async truncate (trx?: CoaMysql.Transaction) {
     await this.table(trx).truncate()
   }
 
   // 获取table对象
-  table (trx?: Transaction) {
+  table (trx?: CoaMysql.Transaction) {
     const table = this.bin.io<Scheme>(this.name).withSchema(this.database)
     trx && table.transacting(trx)
     return table
   }
 
   // 通过某个字段查询ID
-  protected async getIdBy (field: string, value: string | number, trx?: Transaction) {
+  protected async getIdBy (field: string, value: string | number, trx?: CoaMysql.Transaction) {
     const result = await this.table(trx).select(this.key).where(field, value)
-    const data = result[0] as Dic<string> || {}
+    const data = result[0] as CoaMysql.Dic<string> || {}
     return data[this.key] || ''
   }
 
   // 查询全部列表数量
-  protected async selectListCount (query: Query, trx?: Transaction) {
+  protected async selectListCount (query: CoaMysql.Query, trx?: CoaMysql.Transaction) {
     const qb = this.table(trx).count({ count: this.name + '.' + this.increment })
     query(qb)
     const rows = await qb
@@ -187,7 +187,7 @@ export class MysqlNative<Scheme> {
   }
 
   // 查询ID格式全部列表
-  protected async selectIdList (query: Query, trx?: Transaction) {
+  protected async selectIdList (query: CoaMysql.Query, trx?: CoaMysql.Transaction) {
     const qb = this.table(trx).select(this.name + '.' + this.key)
     query(qb)
     qb.orderBy(this.name + '.' + this.increment, 'desc')
@@ -195,7 +195,7 @@ export class MysqlNative<Scheme> {
   }
 
   // 查询ID格式Sort列表
-  protected async selectIdSortList (pager: Pager, query: Query, trx?: Transaction) {
+  protected async selectIdSortList (pager: CoaMysql.Pager, query: CoaMysql.Query, trx?: CoaMysql.Transaction) {
 
     let { last, rows, more, ext } = this.checkSortPager(pager)
 
@@ -216,7 +216,7 @@ export class MysqlNative<Scheme> {
   }
 
   // 查询ID格式Sort列表
-  protected async selectIdViewList (pager: Pager, query: Query, trx?: Transaction, count?: number) {
+  protected async selectIdViewList (pager: CoaMysql.Pager, query: CoaMysql.Query, trx?: CoaMysql.Transaction, count?: number) {
 
     if (count === undefined)
       count = await this.selectListCount(query, trx)
@@ -234,7 +234,7 @@ export class MysqlNative<Scheme> {
   }
 
   // 检查分页参数
-  protected checkSortPager (pager: Pager) {
+  protected checkSortPager (pager: CoaMysql.Pager) {
     let last = pager.last, rows = pager.rows, more = false as boolean, ext = pager.ext || {}
     if (last < 0) last = 0
     if (rows < 1) CoaError.throw('MysqlNative.PagerRowsInvalid', 'pager rows 参数有误')
@@ -243,7 +243,7 @@ export class MysqlNative<Scheme> {
   }
 
   // 检查View分页参数
-  protected checkViewPager (pager: Pager, count: number) {
+  protected checkViewPager (pager: CoaMysql.Pager, count: number) {
     let rows = pager.rows, page = pager.page
     if (rows < 1) CoaError.throw('MysqlNative.PagerRowsInvalid', 'pager rows 参数有误')
     else if (rows > MaxPageRows) rows = MaxPageRows

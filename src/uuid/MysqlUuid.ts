@@ -1,7 +1,7 @@
 import { _, HashIds } from 'coa-helper'
 import { Transaction } from 'knex'
 import { MysqlBin } from '../MysqlBin'
-import lock from './lock'
+import lock from './helper/lock'
 
 const hexIds = new HashIds('UUID-HEX', 12, '0123456789abcdef')
 const hashIds = new HashIds('UUID-HASH', 12, '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
