@@ -167,7 +167,7 @@ export class MysqlNative<Scheme> {
   // 获取table对象
   table (trx?: CoaMysql.Transaction) {
     const table = this.bin.io<Scheme>(this.name).withSchema(this.database)
-    trx && table.transacting(trx)
+    trx && table.transacting(trx.getRawTrx())
     return table
   }
 
