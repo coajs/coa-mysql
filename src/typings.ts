@@ -1,11 +1,12 @@
 import * as Knex from 'knex'
+import { MysqlTransaction } from './MysqlTransaction'
 
 export namespace CoaMysql {
   export type Dic<T> = { [key: string]: T }
   export type SafePartial<T> = T extends {} ? Partial<T> : any
   export type Query = (qb: Knex.QueryBuilder) => void
   export type QueryBuilder = Knex.QueryBuilder
-  export type Transaction = Knex.Transaction
+  export type Transaction = MysqlTransaction
   export type Pager = { rows: number, last: number, page: number, ext?: any }
 
   export type ModelOption<T> = {

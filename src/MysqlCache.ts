@@ -17,13 +17,13 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
 
   async insert (data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const id = await super.insert(data, trx)
-    await this.deleteCache([id], [data])
+    await this.deleteCache([id], [data], trx)
     return id
   }
 
   async mInsert (dataList: CoaMysql.SafePartial<Scheme>[], trx?: CoaMysql.Transaction) {
     const ids = await super.mInsert(dataList, trx)
-    await this.deleteCache(ids, dataList)
+    await this.deleteCache(ids, dataList, trx)
     return ids
   }
 
@@ -31,7 +31,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
     const dataList = await this.getCacheChangedDataList([id], data, trx)
     const result = await super.updateById(id, data, trx)
     if (result)
-      await this.deleteCache([id], dataList)
+      await this.deleteCache([id], dataList, trx)
     return result
   }
 
@@ -39,7 +39,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
     const dataList = await this.getCacheChangedDataList(ids, data, trx)
     const result = await super.updateByIds(ids, data, trx)
     if (result)
-      await this.deleteCache(ids, dataList)
+      await this.deleteCache(ids, dataList, trx)
     return result
   }
 
@@ -47,14 +47,14 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
     const dataList = await this.getCacheChangedDataList([id], data, trx)
     const result = await super.updateForQueryById(id, query, data, trx)
     if (result)
-      await this.deleteCache([id], dataList)
+      await this.deleteCache([id], dataList, trx)
     return result
   }
 
   async upsertById (id: string, data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList([id], data, trx)
     const result = await super.upsertById(id, data, trx)
-    await this.deleteCache([id], dataList)
+    await this.deleteCache([id], dataList, trx)
     return result
   }
 
@@ -62,7 +62,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
     const dataList = await this.getCacheChangedDataList(ids, undefined, trx)
     const result = await super.deleteByIds(ids, trx)
     if (result)
-      await this.deleteCache(ids, dataList)
+      await this.deleteCache(ids, dataList, trx)
     return result
   }
 
@@ -158,7 +158,12 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
     return resultList
   }
 
-  protected async deleteCache (ids: string[], dataList: CoaMysql.SafePartial<Scheme>[]) {
+  protected async deleteCache (ids: string[], dataList: CoaMysql.SafePartial<Scheme>[], trx?: CoaMysql.Transaction) {
+    const deleteIds = this.getDeleteIds(ids, dataList)
+    trx ? trx.recordDeleteCache(deleteIds) : await this.redisCache.mDelete(deleteIds)
+  }
+
+  private getDeleteIds (ids: string[], dataList: CoaMysql.SafePartial<Scheme>[]) {
     const deleteIds = [] as CoaRedis.CacheDelete[]
     deleteIds.push([this.getCacheNsp('id'), ids])
     deleteIds.push([this.getCacheNsp('data'), []])
@@ -175,6 +180,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
         ids.length && deleteIds.push([this.getCacheNsp(name, key), ids])
       })
     })
-    await this.redisCache.mDelete(deleteIds)
+
+    return deleteIds
   }
 }
