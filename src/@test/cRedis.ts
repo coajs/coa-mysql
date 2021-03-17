@@ -1,7 +1,7 @@
 import { RedisBin, RedisCache } from 'coa-redis'
 
 export default new class {
-  protected bin = new RedisBin({
+  public bin = new RedisBin({
     host: '127.0.0.1',
     port: 6379,
     password: '',

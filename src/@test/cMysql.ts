@@ -3,7 +3,7 @@ import cRedis from './cRedis'
 
 export default new class {
 
-  protected bin = new MysqlBin({
+  public bin = new MysqlBin({
     host: '127.0.0.1',
     port: 3306,
     user: 'root',

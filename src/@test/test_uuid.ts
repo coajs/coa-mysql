@@ -9,7 +9,7 @@ export default new class {
 
   async testUuid () {
 
-    const workers = _.times(100, i => new Promise(async resolve => {
+    const workers = _.times(100, i => new Promise<void>(async resolve => {
       await $.timeout(_.random(1, 10))
       const id = await cMysql.uuid.saltId()
       console.log(i, id)
