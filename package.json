@@ -1,6 +1,6 @@
 {
   "name": "coa-mysql",
-  "version": "1.3.1",
+  "version": "0.0.0",
   "description": "Mysql component for coa",
   "keywords": [
     "coajs",
@@ -9,36 +9,28 @@
   ],
   "license": "MIT",
   "author": "Aex",
-  "homepage": "https://github.com/coajs/coa-mysql",
+  "homepage": "https://github.com/coajs",
   "repository": {
     "type": "git",
     "url": "https://github.com/coajs/coa-mysql.git"
   },
   "scripts": {
     "dev": "tsc -w",
-    "build": "rm -rf dist && tsc && cp package.json dist",
-    "publish-patch": "yarn build && yarn version --patch && cp package.json README.md dist && cd dist && rm -rf @* && npm publish",
-    "publish-prerelease": "yarn build && yarn version --prerelease && cp package.json README.md dist && cd dist && rm -rf @* && npm publish",
+    "build": "rm -rf dist && tsc && cp package.json *.md dist && rm -rf dist/@*",
+    "publish-prerelease": "yarn build && yarn version --prerelease && cp package.json *.md dist && cd dist && rm -rf @* && npm publish",
     "test": "NODE_PATH=run node dist/@test"
   },
   "dependencies": {
+    "coa-echo": "^1.0.8",
+    "coa-error": "^1.1.3",
+    "coa-helper": "^1.1.1",
+    "coa-redis": "^1.3.2",
+    "coa-secure": "^1.1.2",
     "knex": "0.21",
     "mysql": "^2.18.1"
   },
   "devDependencies": {
     "@types/node": "^14.14.35",
-    "coa-echo": "^1.0.8",
-    "coa-error": "^1.1.3",
-    "coa-helper": "^1.1.1",
-    "coa-redis": "^1.3.1",
-    "coa-secure": "^1.1.2",
     "typescript": "^4.2.3"
-  },
-  "peerDependencies": {
-    "coa-echo": "1",
-    "coa-error": "1",
-    "coa-helper": "1",
-    "coa-redis": "1",
-    "coa-secure": "1"
   }
 }
