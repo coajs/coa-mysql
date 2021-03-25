@@ -12,13 +12,13 @@ COA核心MySQL数据库组件，包含基本数据模型、缓存数据模型、
 - **功能齐全** 基础数据连接基于[mysql](https://github.com/mysqljs/mysql)，SQL查询基于[knex](https://github.com/knex/knex)库，注重性能，功能齐全包含原生库所有使用方式
 - **简单轻量** 不超过1000行代码，不依赖于其他第三方库
 - **快捷方便** 基本数据模型自带CRUD操作，无需额外代码
-- **自动缓存** 缓存数据模型能自动处理数据缓存、数据淘汰逻辑，缓存基于[coa-redis](https://github.com/coajs/coa-redis)
+- **自动缓存** 缓存数据模型能自动进行数据的缓存管理（缓存生成、缓存淘汰等逻辑），缓存基于[coa-redis](https://github.com/coajs/coa-redis)
 - **TypeScript** 全部使用TypeScript书写，类型约束、IDE友好
 
 ## 组件
 
-- 基本数据模型 `MysqlCache` 自动实现基本的CRUD等操作
-- 缓存数据模型 `MysqlNative` 在基本数据模型上自动处理数据缓存机制
+- 基本数据模型 `MysqlNative` 自动实现基本的CRUD等操作
+- 缓存数据模型 `MysqlCache` 在基本数据模型上接管数据缓存逻辑
 - 分布式ID `MysqlUuid` 超轻量的分布式UUID
 
 ## 快速开始
@@ -32,7 +32,7 @@ yarn add coa-mysql
 ### 实例配置
 
 ```typescript
-import { MysqlBin } from '..'
+import { MysqlBin } from 'coa-mysql'
 
 // MySQL配置
 const mysqlConfig = {
@@ -55,7 +55,7 @@ const mysqlBin = new MysqlBin(mysqlConfig)
 
 ### 基本SQL查询
 
-现在用户表`user`，表结构如下
+新建用户表`user`，表结构如下
 
 ```shell
 CREATE TABLE `user` (
@@ -219,7 +219,7 @@ await User.customMethodForUser()
 
 ### 缓存数据模型
 
-缓存数据模型基于 [coa-redis](https://www.npmjs.com/package/coa-redis) 实现快速高效的数据缓存，并**统一对缓存进行管理、维护缓存的生命周期、保证缓存与MySQL数据的一致性**
+基于 [coa-redis](https://www.npmjs.com/package/coa-redis) 实现快速高效的数据缓存逻辑，并**统一对缓存进行管理、维护缓存的生命周期、保证缓存与MySQL数据的一致性**
 
 使用之前需安装 `coa-redis` ，使用方法可查看 [这里](https://github.com/coajs/coa-redis)
 
