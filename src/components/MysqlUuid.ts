@@ -1,7 +1,7 @@
 import { _, HashIds } from 'coa-helper'
 import { Transaction } from 'knex'
-import { MysqlBin } from '../MysqlBin'
-import lock from './helper/lock'
+import { MysqlBin } from '../libs/MysqlBin'
+import { MemoryLock } from './MemoryLock'
 
 const hexIds = new HashIds('UUID-HEX', 12, '0123456789abcdef')
 const hashIds = new HashIds('UUID-HASH', 12, '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
@@ -68,7 +68,7 @@ export class MysqlUuid {
   }
 
   private async init () {
-    await lock.start('uuid-init', async () => {
+    await MemoryLock.start('uuid-init', async () => {
       if (!this.isNeedInit())
         return
       this.key1 = this.getKey1()

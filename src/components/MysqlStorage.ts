@@ -1,6 +1,6 @@
 import { RedisCache } from 'coa-redis'
-import { MysqlBin } from '../MysqlBin'
-import { MysqlCache } from '../MysqlCache'
+import { MysqlBin } from '../libs/MysqlBin'
+import { MysqlCache } from '../services/MysqlCache'
 
 const scheme = {
   key: '' as string,

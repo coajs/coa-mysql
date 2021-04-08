@@ -2,9 +2,9 @@ import { CoaError } from 'coa-error'
 import { $, _ } from 'coa-helper'
 import { CoaRedis, RedisCache } from 'coa-redis'
 import { secure } from 'coa-secure'
-import { MysqlBin } from './MysqlBin'
+import { MysqlBin } from '../libs/MysqlBin'
 import { MysqlNative } from './MysqlNative'
-import { CoaMysql } from './typings'
+import { CoaMysql } from '../typings'
 
 export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
 
