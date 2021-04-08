@@ -148,7 +148,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
     let has = true
     const resultList = [] as CoaMysql.SafePartial<Scheme>[]
     if (data) {
-      has = _.some(this.cachesFields, i => !!(data as any)[i])
+      has = _.some(this.cachesFields, i => (data as any)[i] !== undefined)
       resultList.push(data)
     }
     if (has) {
