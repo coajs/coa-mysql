@@ -1,7 +1,7 @@
 import { CoaError } from 'coa-error'
 import { _ } from 'coa-helper'
-import { MysqlBin } from './MysqlBin'
-import { CoaMysql } from './typings'
+import { MysqlBin } from '../libs/MysqlBin'
+import { CoaMysql } from '../typings'
 
 const MaxPageRows = 2000
 

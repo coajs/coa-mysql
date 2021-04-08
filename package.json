@@ -1,7 +1,7 @@
 {
   "name": "coa-mysql",
   "version": "0.0.0",
-  "description": "Mysql component for coa",
+  "description": "COA核心MySQL数据库组件，包含基本数据模型、缓存数据模型、分布式ID等",
   "keywords": [
     "coajs",
     "coa",
@@ -16,9 +16,9 @@
   },
   "scripts": {
     "dev": "tsc -w",
-    "build": "rm -rf dist && tsc && cp package.json *.md dist && rm -rf dist/@*",
-    "publish-prerelease": "yarn build && yarn version --prerelease && cp package.json *.md dist && cd dist && rm -rf @* && npm publish",
-    "test": "NODE_PATH=run node dist/@test"
+    "build": "rm -rf dist && tsc && cp package.json *.md dist && rm -rf dist/test",
+    "publish-prerelease": "yarn build && yarn version --prerelease && cp package.json *.md dist && cd dist && rm -rf test && npm publish",
+    "test": "NODE_PATH=run node dist/test"
   },
   "dependencies": {
     "coa-echo": "^1.0.8",

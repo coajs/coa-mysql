@@ -38,3 +38,9 @@ jobs:
         run: |
           cd dist
           npm publish
+
+      - name: Sync
+        run: |
+          sleep 5s
+          package_name=$(node -p "require('./package.json').name")
+          curl -X PUT "https://npm.taobao.org/sync/${package_name}?sync_upstream=true"

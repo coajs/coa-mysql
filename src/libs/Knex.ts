@@ -1,6 +1,6 @@
 import { _ } from 'coa-helper'
 import * as Knex from 'knex'
-import { CoaMysql } from './typings'
+import { CoaMysql } from '../typings'
 
 declare module 'knex' {
   interface QueryBuilder {
@@ -39,4 +39,4 @@ Knex.QueryBuilder.extend('inArray', function (array_column: string, value: strin
   return this
 })
 
-export default Knex
+export { Knex }

@@ -2,7 +2,8 @@ import { $ } from 'coa-helper'
 
 const MemoryLockData = {} as { [name: string]: boolean }
 
-class MemoryLock {
+export class MemoryLock {
+
   private readonly key: string
 
   constructor (key: string) {
@@ -21,11 +22,8 @@ class MemoryLock {
   async unlock () {
     delete MemoryLockData[this.key]
   }
-}
 
-export default new class {
-
-  async start<T> (id: string, worker: () => Promise<T>, interval = 10) {
+  static async start<T> (id: string, worker: () => Promise<T>, interval = 10) {
 
     const memoryLock = new MemoryLock(id)
 
@@ -39,5 +37,4 @@ export default new class {
       memoryLock.unlock().then()
     })
   }
-
 }
