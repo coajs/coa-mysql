@@ -1,8 +1,7 @@
 import { MysqlBin, MysqlStorage, MysqlUuid } from '..'
 import cRedis from './cRedis'
 
-export default new class {
-
+export default new (class {
   public bin = new MysqlBin({
     host: '127.0.0.1',
     port: 3306,
@@ -19,5 +18,4 @@ export default new class {
 
   public uuid = new MysqlUuid(this.bin)
   public storage = new MysqlStorage(this.bin, cRedis.cache)
-
-}
+})()

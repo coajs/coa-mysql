@@ -1,16 +1,15 @@
 import { $ } from 'coa-helper'
 
-const MemoryLockData = {} as { [name: string]: boolean }
+const MemoryLockData: { [name: string]: boolean } = {}
 
 export class MemoryLock {
-
   private readonly key: string
 
-  constructor (key: string) {
+  constructor(key: string) {
     this.key = key
   }
 
-  async lock () {
+  async lock() {
     if (MemoryLockData[this.key]) {
       return false
     } else {
@@ -19,16 +18,16 @@ export class MemoryLock {
     }
   }
 
-  async unlock () {
+  async unlock() {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete MemoryLockData[this.key]
   }
 
-  static async start<T> (id: string, worker: () => Promise<T>, interval = 10) {
-
+  static async start<T>(id: string, worker: () => Promise<T>, interval = 10) {
     const memoryLock = new MemoryLock(id)
 
     // 阻塞等待
-    while (!await memoryLock.lock()) {
+    while (!(await memoryLock.lock())) {
       await $.timeout(interval)
     }
 

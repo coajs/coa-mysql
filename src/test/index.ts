@@ -9,6 +9,4 @@ $.run(async () => {
   // await test_storage.testStorageTimeout()
   // await test_storage.testStorageUpdate()
   // await test_uuid.testUuid()
-
 })
-

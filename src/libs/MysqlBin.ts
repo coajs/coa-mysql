@@ -4,12 +4,10 @@ import { Knex } from './Knex'
 import { CoaMysql } from '../typings'
 
 export class MysqlBin {
-
   public io: Knex
   public config: CoaMysql.Config
 
-  constructor (config: CoaMysql.Config) {
-
+  constructor(config: CoaMysql.Config) {
     // 创建数据库连接
     const mysql_env_main = config.databases.main || CoaError.throw('MysqlBin.ConfigMissing', '缺少主数据库配置')
     const { host, port, user, password, charset, debug } = config
@@ -23,13 +21,13 @@ export class MysqlBin {
       CoaError.throw('MysqlBin.Error.' + error.errno + '. ' + error.code, error.sqlMessage)
     })
 
-    config.trace && io.on('query', (data: any) => {
-      echo.grey('* SQL: %s', io.raw(data.sql, data.bindings).toString())
-    })
+    config.trace &&
+      io.on('query', (data: any) => {
+        echo.grey('* SQL: %s', io.raw(data.sql, data.bindings).toString())
+      })
 
     // 赋值
     this.config = config
     this.io = io
-
   }
 }

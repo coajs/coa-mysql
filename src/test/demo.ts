@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-redeclare */
 // @ts-nocheck
 import { CoaMysql, MysqlBin, MysqlNative } from '..'
 
@@ -12,8 +13,8 @@ const mysqlConfig = {
   debug: false,
   databases: {
     main: { database: 'test', ms: 7 * 24 * 3600 * 1000 },
-    other: { database: 'other', ms: 7 * 24 * 3600 * 1000 }
-  }
+    other: { database: 'other', ms: 7 * 24 * 3600 * 1000 },
+  },
 }
 
 // 初始化Mysql基本连接，后续所有模型均依赖此实例
@@ -39,14 +40,13 @@ await mysqlBin.io.table('user').delete().where({ userId: 'user-a' })
 
 // 通过mysqlBin定义一个模型的基类，各个模型都可以使用这个基类
 export class MysqlNativeModel<T> extends MysqlNative<T> {
-
-  constructor (option: CoaMysql.ModelOption<T>) {
+  constructor(option: CoaMysql.ModelOption<T>) {
     // 将实例配置bin绑定
     super(option, mysqlBin)
   }
 
   // 也可以定义一些通用方法
-  commonMethod () {
+  commonMethod() {
     // do something
   }
 }
@@ -67,40 +67,43 @@ const userScheme = {
 type UserScheme = typeof userScheme
 
 // 通过基类初始化
-const User = new class extends MysqlNative<UserScheme> {
-  constructor () {
-    super({
-      name: 'User', // 表名，默认会转化为下划线(snackCase)形式，如 User->user UserPhoto->user_photo
-      title: '用户表', // 表的备注名称
-      scheme: userScheme, // 表的默认结构
-      pick: ['userId', 'name'] // 查询列表时显示的字段信息
-    }, mysqlBin) // 绑定配置实例bin
+const User = new (class extends MysqlNative<UserScheme> {
+  constructor() {
+    super(
+      {
+        name: 'User', // 表名，默认会转化为下划线(snackCase)形式，如 User->user UserPhoto->user_photo
+        title: '用户表', // 表的备注名称
+        scheme: userScheme, // 表的默认结构
+        pick: ['userId', 'name'], // 查询列表时显示的字段信息
+      },
+      mysqlBin
+    ) // 绑定配置实例bin
   }
 
   // 自定义方法
-  async customMethod () {
+  async customMethod() {
     // 做一些事情
   }
-}
+})()
 
 // 通过基类模型定义用户模型
-const User = new class extends MysqlNativeModel<UserScheme> {
-  constructor () {
+const User = new (class extends MysqlNativeModel<UserScheme> {
+  constructor() {
     super({ name: 'User', title: '用户表', scheme: userScheme, pick: ['userId', 'name'] })
   }
 
   // 自定义方法
-  async customMethodForUser () {
+  async customMethodForUser() {
     // 做一些事情
   }
-}
+})()
 
 // 通过基类模型定义管理员模型
-const Manager = new class extends MysqlNativeModel<UserScheme> {
-  constructor () {
+const Manager = new (class extends MysqlNativeModel<UserScheme> {
+  constructor() {
     super({ name: 'Manager', title: '管理员表', scheme: userScheme, pick: ['userId', 'name'] })
   }
-}
+})()
 
 // 用户模型和管理员模型均可以调用公共方法
 await User.commonMethod()
@@ -113,7 +116,10 @@ await User.customMethodForUser()
 await User.insert({ name: '王小明', gender: 1 }) // 返回 'id001'，即该条数据的 userId = 'id001'
 
 // 批量插入
-await User.mInsert([{ name: '王小明', gender: 1 }, { name: '宋小华', gender: 1 }]) // 返回 ['id002','id003']
+await User.mInsert([
+  { name: '王小明', gender: 1 },
+  { name: '宋小华', gender: 1 },
+]) // 返回 ['id002','id003']
 
 // 通过ID更新
 await User.updateById('id002', { name: '李四' }) // 返回 1
@@ -132,7 +138,7 @@ await User.deleteByIds(['id003', 'id004']) // 返回 2
 await User.getById('id001', ['name']) // 数据为{userId:'id001',name:'王小明',gender:1,status:1,...} 实际返回 {userId:'id001',name:'王小明'}
 
 // 通过ID获取多个
-await User.mGetByIds(['id001', 'id002'], ['name']) //返回 {id001:{userId:'id001',name:'王小明'},id002:{userId:'id002',name:'李四'}}
+await User.mGetByIds(['id001', 'id002'], ['name']) // 返回 {id001:{userId:'id001',name:'王小明'},id002:{userId:'id002',name:'李四'}}
 
 // 截断表
 await User.truncate() // 无返回值，主要不报错即成功截断整个表

@@ -5,21 +5,21 @@
 [![npm downloads](https://img.shields.io/npm/dm/coa-mysql.svg?style=flat-square)](http://npm-stat.com/charts.html?package=coa-mysql)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/coajs/coa-mysql/pulls)
 
-COA核心MySQL数据库组件，包含基本数据模型、缓存数据模型、分布式ID等
+COA 核心 MySQL 数据库组件，包含基本数据模型、缓存数据模型、分布式 ID 等
 
 ## 特点
 
-- **功能齐全** 基础数据连接基于[mysql](https://github.com/mysqljs/mysql)，SQL查询基于[knex](https://github.com/knex/knex)库，注重性能，功能齐全包含原生库所有使用方式
-- **简单轻量** 不超过1000行代码，不依赖于其他第三方库
-- **快捷方便** 基本数据模型自带CRUD操作，无需额外代码
+- **功能齐全** 基础数据连接基于[mysql](https://github.com/mysqljs/mysql)，SQL 查询基于[knex](https://github.com/knex/knex)库，注重性能，功能齐全包含原生库所有使用方式
+- **简单轻量** 不超过 1000 行代码，不依赖于其他第三方库
+- **快捷方便** 基本数据模型自带 CRUD 操作，无需额外代码
 - **自动缓存** 缓存数据模型能自动进行数据的缓存管理（缓存生成、缓存淘汰等逻辑），缓存基于[coa-redis](https://github.com/coajs/coa-redis)
-- **TypeScript** 全部使用TypeScript书写，类型约束、IDE友好
+- **TypeScript** 全部使用 TypeScript 书写，类型约束、IDE 友好
 
 ## 组件
 
-- 基本数据模型 `MysqlNative` 自动实现基本的CRUD等操作
+- 基本数据模型 `MysqlNative` 自动实现基本的 CRUD 等操作
 - 缓存数据模型 `MysqlCache` 在基本数据模型上接管数据缓存逻辑
-- 分布式ID `MysqlUuid` 超轻量的分布式UUID
+- 分布式 ID `MysqlUuid` 超轻量的分布式 UUID
 
 ## 快速开始
 
@@ -45,15 +45,15 @@ const mysqlConfig = {
   debug: false,
   databases: {
     main: { database: 'test', ms: 7 * 24 * 3600 * 1000 },
-    other: { database: 'other', ms: 7 * 24 * 3600 * 1000 }
-  }
+    other: { database: 'other', ms: 7 * 24 * 3600 * 1000 },
+  },
 }
 
 // 初始化Mysql基本连接，后续所有模型均依赖此实例
 const mysqlBin = new MysqlBin(mysqlConfig)
 ```
 
-### 基本SQL查询
+### 基本 SQL 查询
 
 新建用户表`user`，表结构如下
 
@@ -74,7 +74,7 @@ CREATE TABLE `user` (
 ) COMMENT='用户表';
 ```
 
-对用户表进行SQL操作
+对用户表进行 SQL 操作
 
 ```typescript
 // 插入数据 https://knexjs.org/#Builder-insert
@@ -98,7 +98,7 @@ mysqlBin.io.table('user').delete().where({ userId: 'user-a' })
 
 ### 基本数据模型
 
-在实际项目工程中，为了保证查询的高效、严谨，我们并不会直接操作SQL语句。基本的数据模块可以帮助我们实现CURD操作。 通过如下方式定义一个基本数据模型`User`
+在实际项目工程中，为了保证查询的高效、严谨，我们并不会直接操作 SQL 语句。基本的数据模块可以帮助我们实现 CURD 操作。 通过如下方式定义一个基本数据模型`User`
 
 ```typescript
 import { MysqlBin, MysqlNative } from 'coa-mysql'
@@ -119,21 +119,24 @@ const userScheme = {
 type UserScheme = typeof userScheme
 
 // 通过基类初始化
-const User = new class extends MysqlNative<UserScheme> {
-  constructor () {
-    super({
-      name: 'User', // 表名，默认会转化为下划线(snackCase)形式，如 User->user UserPhoto->user_photo
-      title: '用户表', // 表的备注名称
-      scheme: userScheme, // 表的默认结构
-      pick: ['userId', 'name'] // 查询列表时显示的字段信息
-    }, mysqlBin) // 绑定配置实例bin
+const User = new (class extends MysqlNative<UserScheme> {
+  constructor() {
+    super(
+      {
+        name: 'User', // 表名，默认会转化为下划线(snackCase)形式，如 User->user UserPhoto->user_photo
+        title: '用户表', // 表的备注名称
+        scheme: userScheme, // 表的默认结构
+        pick: ['userId', 'name'], // 查询列表时显示的字段信息
+      },
+      mysqlBin
+    ) // 绑定配置实例bin
   }
 
   // 自定义方法
-  async customMethod () {
+  async customMethod() {
     // 做一些事情
   }
-}
+})()
 ```
 
 一般一个数据表对应一个模型，定义模型后，我们直接操作模型就可以对表进行操作
@@ -143,7 +146,10 @@ const User = new class extends MysqlNative<UserScheme> {
 await User.insert({ name: '王小明', gender: 1 }) // 返回 'id001'，即该条数据的 userId = 'id001'
 
 // 批量插入
-await User.mInsert([{ name: '王小明', gender: 1 }, { name: '宋小华', gender: 1 }]) // 返回 ['id002','id003']
+await User.mInsert([
+  { name: '王小明', gender: 1 },
+  { name: '宋小华', gender: 1 },
+]) // 返回 ['id002','id003']
 
 // 通过ID更新
 await User.updateById('id002', { name: '李四' }) // 返回 1
@@ -178,36 +184,35 @@ import { CoaMysql } from 'coa-mysql'
 
 // 通过mysqlBin定义一个模型的基类，各个模型都可以使用这个基类
 export class MysqlNativeModel<T> extends MysqlNative<T> {
-
-  constructor (option: CoaMysql.ModelOption<T>) {
+  constructor(option: CoaMysql.ModelOption<T>) {
     // 将实例配置bin绑定
     super(option, mysqlBin)
   }
 
   // 也可以定义一些通用方法
-  commonMethod () {
+  commonMethod() {
     // do something
   }
 }
 
 // 通过基类模型定义用户模型
-const User = new class extends MysqlNativeModel<UserScheme> {
-  constructor () {
+const User = new (class extends MysqlNativeModel<UserScheme> {
+  constructor() {
     super({ name: 'User', title: '用户表', scheme: userScheme, pick: ['userId', 'name'] })
   }
 
   // 自定义方法
-  async customMethodForUser () {
+  async customMethodForUser() {
     // 做一些事情
   }
-}
+})()
 
 // 通过基类模型定义管理员模型
-const Manager = new class extends MysqlNativeModel<UserScheme> {
-  constructor () {
+const Manager = new (class extends MysqlNativeModel<UserScheme> {
+  constructor() {
     super({ name: 'Manager', title: '管理员表', scheme: userScheme, pick: ['userId', 'name'] })
   }
-}
+})()
 
 // 用户模型和管理员模型均可以调用公共方法
 await User.commonMethod()
@@ -219,7 +224,7 @@ await User.customMethodForUser()
 
 ### 缓存数据模型
 
-基于 [coa-redis](https://www.npmjs.com/package/coa-redis) 实现快速高效的数据缓存逻辑，并**统一对缓存进行管理、维护缓存的生命周期、保证缓存与MySQL数据的一致性**
+基于 [coa-redis](https://www.npmjs.com/package/coa-redis) 实现快速高效的数据缓存逻辑，并**统一对缓存进行管理、维护缓存的生命周期、保证缓存与 MySQL 数据的一致性**
 
 使用之前需安装 `coa-redis` ，使用方法可查看 [这里](https://github.com/coajs/coa-redis)
 
@@ -234,18 +239,18 @@ const redisCache = new RedisCache(new RedisBin({ host: '127.0.0.1' }))
 
 // 定义一个缓存数据模型的基类
 export class MysqlCacheModel<T> extends MysqlCache<T> {
-  constructor (option: CoaMysql.ModelOption<T>) {
+  constructor(option: CoaMysql.ModelOption<T>) {
     // 将配置实例 和 redisCache实例 都绑定到这个基类上
     super(option, mysqlBin, redisCache)
   }
 }
 
 // 通过缓存基类模型定义缓存用户模型
-const UserCached = new class extends MysqlCacheModel<UserScheme> {
-  constructor () {
+const UserCached = new (class extends MysqlCacheModel<UserScheme> {
+  constructor() {
     super({ name: 'User', title: '用户表', scheme: userScheme, pick: ['userId', 'name'] })
   }
-}
+})()
 
 // 查询数据
 await User.getById('id001') // 首次查询会先读取数据库
@@ -255,4 +260,5 @@ await User.getById('id001') // 第二次调用会直接从缓存中读取数据
 await User.insert({ name: '王小明', gender: 1 }) // 返回 'id001'
 await User.updateById('id001', { name: '李四' }) // 返回 1
 ```
-缓存模型会自动维护和管理缓存，如果缓存已经存在，接下来又调用update更新了数据，再次查询数据时自动从数据库中取出最新的数据。 实现原理可点击 这里(todo) 了解更多
+
+缓存模型会自动维护和管理缓存，如果缓存已经存在，接下来又调用 update 更新了数据，再次查询数据时自动从数据库中取出最新的数据。 实现原理可点击 这里(todo) 了解更多

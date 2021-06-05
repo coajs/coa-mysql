@@ -26,7 +26,7 @@
     "coa-echo": "^1.1.1",
     "coa-error": "^1.5.2",
     "coa-helper": "^1.2.1",
-    "coa-redis": "^1.4.0-1",
+    "coa-redis": "^1.4.0-2",
     "coa-secure": "^1.2.0",
     "knex": "0.21",
     "mysql": "^2.18.1"

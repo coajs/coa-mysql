@@ -14,9 +14,12 @@
   "rules": {
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/naming-convention": "off",
+    "@typescript-eslint/no-base-to-string": "off",
+    "@typescript-eslint/no-floating-promises": "off",
     "@typescript-eslint/no-namespace": "off",
     "@typescript-eslint/restrict-plus-operands": "off",
     "@typescript-eslint/restrict-template-expressions": "off",
-    "@typescript-eslint/strict-boolean-expressions": "off"
+    "@typescript-eslint/strict-boolean-expressions": "off",
+    "@typescript-eslint/prefer-nullish-coalescing": "off"
   }
 }

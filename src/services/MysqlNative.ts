@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-dynamic-delete */
+/* eslint-disable no-prototype-builtins */
 import { CoaError } from 'coa-error'
 import { _ } from 'coa-helper'
 import { MysqlBin } from '../libs/MysqlBin'
@@ -6,7 +8,6 @@ import { CoaMysql } from '../typings'
 const MaxPageRows = 2000
 
 export class MysqlNative<Scheme> {
-
   public readonly key: string
   public readonly name: string
   public readonly title: string
@@ -17,14 +18,14 @@ export class MysqlNative<Scheme> {
   protected readonly scheme: any
   protected readonly prefix: string
   protected readonly ms: number
-  protected readonly caches = {} as { index: string[], count: string[], [name: string]: string[] }
+  protected readonly caches: { index: string[]; count: string[]; [name: string]: string[] }
   protected readonly cachesFields = [] as string[]
   protected readonly columns = [] as string[]
   protected readonly jsons = [] as string[]
   protected readonly virtual = [] as string[]
   protected readonly bin: MysqlBin
 
-  constructor (option: CoaMysql.ModelOption<Scheme>, bin: MysqlBin) {
+  constructor(option: CoaMysql.ModelOption<Scheme>, bin: MysqlBin) {
     this.bin = bin
 
     // 处理基本数据
@@ -43,16 +44,18 @@ export class MysqlNative<Scheme> {
     // 处理caches
     this.caches = _.defaults(option.caches, { index: [], count: [] })
     // 将需要用到缓存的字段单独记录为一个数组，方便判断是否需要处理缓存
-    _.forEach(this.caches, items => items.forEach(item => {
-      const field = item.split(/[:,]/)[0]
-      this.cachesFields.indexOf(field) < 0 && this.cachesFields.push(field)
-    }))
+    _.forEach(this.caches, (items) =>
+      items.forEach((item) => {
+        const field = item.split(/[:,]/)[0]
+        !this.cachesFields.includes(field) && this.cachesFields.push(field)
+      })
+    )
     // 处理pick unpick
     this.pick = option.pick || []
     const unpick = option.unpick || []
-    unpick.forEach(u => delete (option.scheme as any)[u])
+    unpick.forEach((u) => delete (option.scheme as any)[u])
     // 处理columns
-    _.forEach(this.scheme as any, (v, k: string) => {
+    _.forEach(this.scheme, (v, k: string) => {
       if (v && typeof v === 'object') this.jsons.push(k)
       if (k.startsWith('v_')) this.virtual.push(k)
       this.columns.push(k)
@@ -62,15 +65,15 @@ export class MysqlNative<Scheme> {
   }
 
   // 获取ID
-  public async newId () {
+  public async newId() {
     CoaError.throw('MysqlNative.NewIdMethodNotImplement', '尚未实现newId()方法')
     return '' as string
   }
 
   // 插入
-  async insert (data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
+  async insert(data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
     // 设置主键ID
-    const id = (data as any)[this.key] as string || await this.newId()
+    const id = ((data as any)[this.key] as string) || (await this.newId())
     // 设置时间数据
     const time = _.now()
     const value = { [this.key]: id, created: time, updated: time, ...data }
@@ -80,14 +83,13 @@ export class MysqlNative<Scheme> {
   }
 
   // 批量插入
-  async mInsert (dataList: Partial<Scheme>[], trx?: CoaMysql.Transaction) {
+  async mInsert(dataList: Array<Partial<Scheme>>, trx?: CoaMysql.Transaction) {
     const time = _.now()
     const values = [] as any
     const ids = [] as string[]
-    for (const i in dataList) {
-      const data = dataList[i] as any
+    for (const data of dataList) {
       // 设置主键ID
-      const id = data[this.key] || await this.newId()
+      const id = (data as any)[this.key] || (await this.newId())
       // 设置时间数据
       const value = { [this.key]: id, created: time, updated: time, ...data }
       values.push(this.fill(value, true))
@@ -98,21 +100,23 @@ export class MysqlNative<Scheme> {
   }
 
   // 通过ID更新
-  async updateById (id: string, data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
+  async updateById(id: string, data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
     _.defaults(data, { updated: _.now() })
-    const result = await this.table(trx).where({ [this.key]: id }).update(this.fill(data))
+    const result = await this.table(trx)
+      .where({ [this.key]: id })
+      .update(this.fill(data))
     return result || 0
   }
 
   // 通过ID批量更新
-  async updateByIds (ids: string[], data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
+  async updateByIds(ids: string[], data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
     _.defaults(data, { updated: _.now() })
     const result = await this.table(trx).whereIn(this.key, ids).update(this.fill(data))
     return result || 0
   }
 
   // 通过查询条件更新
-  async updateForQueryById (id: string, query: CoaMysql.Query, data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
+  async updateForQueryById(id: string, query: CoaMysql.Query, data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
     _.defaults(data, { updated: _.now() })
     const qb = this.table(trx).where({ [this.key]: id })
     query(qb)
@@ -121,10 +125,12 @@ export class MysqlNative<Scheme> {
   }
 
   // 通过ID更新或插入
-  async upsertById (id: string, data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
+  async upsertById(id: string, data: Partial<Scheme>, trx?: CoaMysql.Transaction) {
     const time = _.now()
     _.defaults(data, { updated: time })
-    const result = await this.table(trx).where({ [this.key]: id }).update(this.fill(data))
+    const result = await this.table(trx)
+      .where({ [this.key]: id })
+      .update(this.fill(data))
     if (result === 0) {
       _.defaults(data, { [this.key]: id, created: time })
       await this.table(trx).insert(this.fill(data, true))
@@ -133,93 +139,89 @@ export class MysqlNative<Scheme> {
   }
 
   // 通过ID删除多个
-  async deleteByIds (ids: string[], trx?: CoaMysql.Transaction) {
+  async deleteByIds(ids: string[], trx?: CoaMysql.Transaction) {
     const result = await this.table(trx).whereIn(this.key, ids).delete()
     return result || 0
   }
 
   // 通过ID获取一个
-  async getById (id: string, pick = this.columns, trx?: CoaMysql.Transaction) {
+  async getById(id: string, pick = this.columns, trx?: CoaMysql.Transaction) {
     const result = await this.table(trx).select(pick).where(this.key, id)
     return this.result(result[0], pick)
   }
 
   // 通过ID获取多个
-  async mGetByIds (ids: string[], pick = this.pick, trx?: CoaMysql.Transaction) {
-    const result = {} as CoaMysql.Dic<Scheme>
-    pick.indexOf(this.key) < 0 && pick.unshift(this.key)
+  async mGetByIds(ids: string[], pick = this.pick, trx?: CoaMysql.Transaction) {
+    const result: CoaMysql.Dic<Scheme> = {}
+    !pick.includes(this.key) && pick.unshift(this.key)
     const rows = await this.table(trx).select(pick).whereIn(this.key, ids)
     rows.forEach((v: any) => {
       const key = v[this.key] as string
       result[key] = this.result(v, pick) as any
     })
-    ids.forEach(id => {
+    ids.forEach((id) => {
       if (!result.hasOwnProperty(id)) result[id] = null as any
     })
     return result
   }
 
   // 截断表
-  async truncate (trx?: CoaMysql.Transaction) {
+  async truncate(trx?: CoaMysql.Transaction) {
     await this.table(trx).truncate()
   }
 
   // 获取table对象
-  table (trx?: CoaMysql.Transaction) {
+  table(trx?: CoaMysql.Transaction) {
     const table = this.bin.io<Scheme>(this.name).withSchema(this.database)
     trx && table.transacting(trx)
     return table
   }
 
   // 通过某个字段查询ID
-  protected async getIdBy (field: string, value: string | number, trx?: CoaMysql.Transaction) {
+  protected async getIdBy(field: string, value: string | number, trx?: CoaMysql.Transaction) {
     const result = await this.table(trx).select(this.key).where(field, value)
-    const data = result[0] as CoaMysql.Dic<string> || {}
+    const data = (result[0] as CoaMysql.Dic<string>) || {}
     return data[this.key] || ''
   }
 
   // 查询全部列表数量
-  protected async selectListCount (query: CoaMysql.Query, trx?: CoaMysql.Transaction) {
+  protected async selectListCount(query: CoaMysql.Query, trx?: CoaMysql.Transaction) {
     const qb = this.table(trx).count({ count: this.name + '.' + this.increment })
     query(qb)
     const rows = await qb
-    return rows[0]?.count as number || 0
+    return (rows[0]?.count as number) || 0
   }
 
   // 查询ID格式全部列表
-  protected async selectIdList (query: CoaMysql.Query, trx?: CoaMysql.Transaction) {
+  protected async selectIdList(query: CoaMysql.Query, trx?: CoaMysql.Transaction) {
     const qb = this.table(trx).select(this.name + '.' + this.key)
     query(qb)
     qb.orderBy(this.name + '.' + this.increment, 'desc')
-    return await qb as Scheme[]
+    return (await qb) as Scheme[]
   }
 
   // 查询ID格式Sort列表
-  protected async selectIdSortList (pager: CoaMysql.Pager, query: CoaMysql.Query, trx?: CoaMysql.Transaction) {
-
+  protected async selectIdSortList(pager: CoaMysql.Pager, query: CoaMysql.Query, trx?: CoaMysql.Transaction) {
     let { last, rows, more, ext } = this.checkSortPager(pager)
 
     const qb = this.table(trx).select(this.name + '.' + this.key)
     query(qb)
     ext.ignoreLimit || qb.limit(rows + 1).offset(last)
     ext.ignoreOrder || qb.orderBy(this.name + '.' + this.increment, 'desc')
-    const list = await qb as Scheme[]
+    const list = (await qb) as Scheme[]
 
     if (list.length === rows + 1) {
       list.pop()
       more = true
-    } else
-      rows = list.length
+    } else rows = list.length
     last = last + rows
 
     return { list, page: { last, more, rows } }
   }
 
   // 查询ID格式Sort列表
-  protected async selectIdViewList (pager: CoaMysql.Pager, query: CoaMysql.Query, trx?: CoaMysql.Transaction, count?: number) {
-
-    if (count === undefined)
-      count = await this.selectListCount(query, trx)
+  protected async selectIdViewList(pager: CoaMysql.Pager, query: CoaMysql.Query, trx?: CoaMysql.Transaction, count?: number) {
+    if (count === undefined) count = await this.selectListCount(query, trx)
 
     let { rows, page, pageMax } = this.checkViewPager(pager, count)
 
@@ -227,15 +229,18 @@ export class MysqlNative<Scheme> {
     query(qb)
     qb.limit(rows).offset(rows * (page - 1))
     qb.orderBy(this.name + '.' + this.increment, 'desc')
-    const list = await qb as Scheme[]
+    const list = (await qb) as Scheme[]
     rows = list.length
 
     return { list, pager: { rows, page, pageMax, count } }
   }
 
   // 检查分页参数
-  protected checkSortPager (pager: CoaMysql.Pager) {
-    let last = pager.last, rows = pager.rows, more = false as boolean, ext = pager.ext || {}
+  protected checkSortPager(pager: CoaMysql.Pager) {
+    let last = pager.last
+    let rows = pager.rows
+    const more = false as boolean
+    const ext = pager.ext || {}
     if (last < 0) last = 0
     if (rows < 1) CoaError.throw('MysqlNative.PagerRowsInvalid', 'pager rows 参数有误')
     else if (rows > MaxPageRows) rows = MaxPageRows
@@ -243,42 +248,41 @@ export class MysqlNative<Scheme> {
   }
 
   // 检查View分页参数
-  protected checkViewPager (pager: CoaMysql.Pager, count: number) {
-    let rows = pager.rows, page = pager.page
+  protected checkViewPager(pager: CoaMysql.Pager, count: number) {
+    let rows = pager.rows
+    let page = pager.page
     if (rows < 1) CoaError.throw('MysqlNative.PagerRowsInvalid', 'pager rows 参数有误')
     else if (rows > MaxPageRows) rows = MaxPageRows
-    let pageMax = _.ceil(count / rows)
+    const pageMax = _.ceil(count / rows)
     if (page > pageMax) page = pageMax
     if (page < 1) page = 1
     return { rows, page, pageMax }
   }
 
   // 从数据库获取之后补全数据
-  protected result (data: any, pick: string[]) {
-    if (data === null || data === undefined)
-      return null
+  protected result(data: any, pick: string[]) {
+    if (data === null || data === undefined) return null
     // 处理json
-    this.jsons.forEach(k => {
+    this.jsons.forEach((k) => {
       if (data[k]) data[k] = JSON.parse(data[k])
     })
     // 处理默认值
     const result = {} as any
-    pick.forEach(k => {
+    pick.forEach((k) => {
       result[k] = data.hasOwnProperty(k) ? data[k] : this.scheme[k]
     })
     return result as Scheme
   }
 
   // 更新和插入数据库之前处理数据
-  protected fill (data: any, insert = false) {
+  protected fill(data: any, insert = false) {
     // 当为insert的时候填满数据
     insert && _.defaults(data, this.scheme)
     // 处理json
-    this.jsons.forEach(k => {
-      if (typeof data[k] === 'object')
-        data[k] = JSON.stringify(data[k])
+    this.jsons.forEach((k) => {
+      if (typeof data[k] === 'object') data[k] = JSON.stringify(data[k])
     })
-    this.virtual.forEach(k => {
+    this.virtual.forEach((k) => {
       delete data[k]
     })
     return data

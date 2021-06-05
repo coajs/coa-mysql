@@ -429,10 +429,10 @@ coa-helper@^1.2.1:
     hashids "^2.2.8"
     lodash "^4.17.21"
 
-coa-redis@^1.4.0-1:
-  version "1.4.0-1"
-  resolved "https://registry.npmjs.org/coa-redis/-/coa-redis-1.4.0-1.tgz#aa30ee6defe46d0c1348d1f23ad7cbb4b725c58b"
-  integrity sha512-Icnq6m2IL3oHBDgJrGm/78Ny3VGJsA0h3VjtziYuV+8hOls1/rGfSGE/2cu5QmOlXTmWwmnTAQOpudhs89oGqQ==
+coa-redis@^1.4.0-2:
+  version "1.4.0-2"
+  resolved "https://registry.npmjs.org/coa-redis/-/coa-redis-1.4.0-2.tgz#3177e8e939d138e1a329bfb5d92ce8370dd0ce4a"
+  integrity sha512-4WGrBxECj3JjQF72OdYm2NlsSKYgHeSZPsA8XIi4Orn4GH/7rcQi0sw1itpl0g1ONI2WwqLpvC+UWVU9HqgGXg==
   dependencies:
     "@types/ioredis" "^4.26.4"
     coa-echo "^1.1.1"

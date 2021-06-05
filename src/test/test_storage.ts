@@ -2,14 +2,10 @@ import { echo } from 'coa-echo'
 import { $, _ } from 'coa-helper'
 import cMysql from './cMysql'
 
-export default new class {
+export default new (class {
+  noop() {}
 
-  noop () {
-
-  }
-
-  async testStorageTimeout () {
-
+  async testStorageTimeout() {
     const key = 'test' + _.random(10, 99)
     const value1 = { a: _.random(100, 999) }
     const value2 = { a: _.random(1000, 9999) }
@@ -25,11 +21,9 @@ export default new class {
 
     const get2 = await cMysql.storage.get(key)
     echo.log('get2', get2)
-
   }
 
-  async testStorageUpdate () {
-
+  async testStorageUpdate() {
     const key = 'test' + _.random(10, 99)
     const value1 = { a: _.random(100, 999) }
     const value2 = { a: _.random(1000, 9999) }
@@ -46,7 +40,5 @@ export default new class {
     echo.log('get2', get2)
 
     await cMysql.storage.get(key)
-
   }
-
-}
+})()
