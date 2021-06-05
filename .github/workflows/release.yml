@@ -34,10 +34,6 @@ jobs:
           yarn version --no-git-tag-version --new-version ${{ github.event.release.tag_name }}
           yarn build
 
-      - name: Test
-        run: |
-          yarn test
-
       - name: Publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.AEX_NPM_TOKEN }}
