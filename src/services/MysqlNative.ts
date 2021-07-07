@@ -216,7 +216,9 @@ export class MysqlNative<Scheme> {
     } else rows = list.length
     last = last + rows
 
-    return { list, page: { last, more, rows } }
+    const pagerName = ext.pagerName || 'page'
+
+    return { list, [pagerName]: { last, more, rows } }
   }
 
   // 查询ID格式Sort列表
