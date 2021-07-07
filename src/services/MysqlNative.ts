@@ -216,7 +216,7 @@ export class MysqlNative<Scheme> {
     } else rows = list.length
     last = last + rows
 
-    const pagerName = ext.pagerName || 'page'
+    const pagerName: string = ext.pagerName || 'page'
 
     return { list, [pagerName]: { last, more, rows } }
   }
