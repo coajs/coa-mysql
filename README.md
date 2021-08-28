@@ -5,36 +5,38 @@
 [![npm downloads](https://img.shields.io/npm/dm/coa-mysql.svg?style=flat-square)](http://npm-stat.com/charts.html?package=coa-mysql)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/coajs/coa-mysql/pulls)
 
-COA 核心 MySQL 数据库组件，包含基本数据模型、缓存数据模型、分布式 ID 等
+English | [简体中文](README.zh-CN.md)
 
-## 特点
+MySQL database components for coajs, including basic data models, cache data models, distributed ID, etc.
 
-- **功能齐全** 基础数据连接基于[mysql](https://github.com/mysqljs/mysql)，SQL 查询基于[knex](https://github.com/knex/knex)库，注重性能，功能齐全包含原生库所有使用方式
-- **简单轻量** 不超过 1000 行代码，不依赖于其他第三方库
-- **快捷方便** 基本数据模型自带 CRUD 操作，无需额外代码
-- **自动缓存** 缓存数据模型能自动进行数据的缓存管理（缓存生成、缓存淘汰等逻辑），缓存基于[coa-redis](https://github.com/coajs/coa-redis)
-- **TypeScript** 全部使用 TypeScript 书写，类型约束、IDE 友好
+## Feature
 
-## 组件
+- **Functional**: Basic data connection based on [mysql](https://github.com/mysqljs/mysql)，SQL query based on [knex](https://github.com/knex/knex). Pay attention to performance, full-featured, including original library all use methods
+- **Lightweight**: No more than 1,000 lines of code, do not rely on other third-party libraries
+- **Fast and Convenient**: Basic data model comes with CRUD operation, no extra code
+- **Automatic Cache**: Cache data model automatically performs data cache management (cache generation, cache elimination, etc.), cache is based on[coa-redis](https://github.com/coajs/coa-redis)
+- **TypeScript**: All written in TypeScript, type constraint, IDE friendship
 
-- 基本数据模型 `MysqlNative` 自动实现基本的 CRUD 等操作
-- 缓存数据模型 `MysqlCache` 在基本数据模型上接管数据缓存逻辑
-- 分布式 ID `MysqlUuid` 超轻量的分布式 UUID
+## Component
 
-## 快速开始
+- Basic data model `MysqlNative`: Automatically implement basic CRUD
+- Cache data model `MysqlCache`: Take over data cache logic on the basic data model
+- Distributed ID `MysqlUuid`: Lightweight distributed UUID
 
-### 安装
+## Quick Start
+
+### Install
 
 ```shell
 yarn add coa-mysql
 ```
 
-### 实例配置
+### Instance configuration
 
 ```typescript
 import { MysqlBin } from 'coa-mysql'
 
-// MySQL配置
+// MySQL configuration
 const mysqlConfig = {
   host: '127.0.0.1',
   port: 3306,
@@ -49,61 +51,62 @@ const mysqlConfig = {
   },
 }
 
-// 初始化Mysql基本连接，后续所有模型均依赖此实例
+// Initialize MySQL basic connection,
+// follow-up all models depend on this example
 const mysqlBin = new MysqlBin(mysqlConfig)
 ```
 
-### 基本 SQL 查询
+### Basic SQL query
 
-新建用户表`user`，表结构如下
+New user table `user`, the table structure is as follows
 
 ```shell
 CREATE TABLE `user` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增长主键',
-  `userId` varchar(32) NOT NULL DEFAULT '' COMMENT '用户ID',
-  `name` varchar(64) NOT NULL DEFAULT '' COMMENT '姓名',
-  `mobile` varchar(16) NOT NULL DEFAULT '' COMMENT '手机号',
-  `avatar` varchar(256) NOT NULL DEFAULT '' COMMENT '头像',
-  `gender` int(11) NOT NULL DEFAULT '0' COMMENT '性别，1男 2女',
-  `language` varchar(16) NOT NULL DEFAULT '' COMMENT '语言',
-  `status` int(1) NOT NULL DEFAULT '1' COMMENT '状态，1正常 2隐藏',
-  `created` bigint(20) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `updated` bigint(20) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Self-increased primary key',
+  `userId` varchar(32) NOT NULL DEFAULT '' COMMENT 'user ID',
+  `name` varchar(64) NOT NULL DEFAULT '' COMMENT 'name',
+  `mobile` varchar(16) NOT NULL DEFAULT '' COMMENT 'mobile',
+  `avatar` varchar(256) NOT NULL DEFAULT '' COMMENT 'avatar',
+  `gender` int(11) NOT NULL DEFAULT '0' COMMENT 'gender, 1 male, 2 female',
+  `language` varchar(16) NOT NULL DEFAULT '' COMMENT 'language',
+  `status` int(1) NOT NULL DEFAULT '1' COMMENT 'status, 1 normal 2 hidden',
+  `created` bigint(20) NOT NULL DEFAULT '0' COMMENT 'Create time',
+  `updated` bigint(20) NOT NULL DEFAULT '0' COMMENT 'Update time',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `user_userid_unique` (`userId`) USING BTREE
-) COMMENT='用户表';
+) COMMENT='User Table';
 ```
 
-对用户表进行 SQL 操作
+SQL operations on the user table
 
 ```typescript
-// 插入数据 https://knexjs.org/#Builder-insert
+// Insert data, see https://knexjs.org/#Builder-insert
 mysqlBin.io.table('user').insert({ userId: 'user-a', name: 'A', mobile: '15010001001', gender: 1, language: 'zh-CN', status: 1 })
 
-// 查询全部数据，详见 https://knexjs.org/#Builder-select
+// Query all data, see https://knexjs.org/#Builder-select
 mysqlBin.io.table('user').select()
 mysqlBin.io.select('*').from('user')
 
-// 带条件查询，详见 https://knexjs.org/#Builder-where
+// Conditional queries, see https://knexjs.org/#Builder-where
 mysqlBin.io.table('user').where('status', '=', 1)
 
-// 修改数据，详见 http://knexjs.org/#Builder-update
+// Update data, see http://knexjs.org/#Builder-update
 mysqlBin.io.table('user').update({ name: 'AA', gender: 2 }).where({ userId: 'user-a' })
 
-// 删除数据，详见 http://knexjs.org/#Builder-del%20/%20delete
+// Delete data, see http://knexjs.org/#Builder-del%20/%20delete
 mysqlBin.io.table('user').delete().where({ userId: 'user-a' })
 ```
 
-其中`io`是一个`Knex`对象，可以支持 [Knex.js](http://knexjs.org/#Builder) 的**全部**用法
+The `io` in this is a `Knex` object, can support **all the usage** of [Knex.js](http://knexjs.org/#Builder)
 
-### 基本数据模型
+### Basic data model
 
-在实际项目工程中，为了保证查询的高效、严谨，我们并不会直接操作 SQL 语句。基本的数据模块可以帮助我们实现 CURD 操作。 通过如下方式定义一个基本数据模型`User`
+In project engineering, in order to ensure the efficiency and rigor of the query, we will not directly operate the SQL statement. Basic data modules can help us implement CURD operations. Define a basic data model `User` by as follows
 
 ```typescript
 import { MysqlBin, MysqlNative } from 'coa-mysql'
 
-// 定义User默认结构
+// Define the default structure of User
 const userScheme = {
   userId: '' as string,
   name: '' as string,
@@ -115,150 +118,151 @@ const userScheme = {
   created: 0 as number,
   updated: 0 as number,
 }
-// 定义User类型（通过默认结构自动生成）
+// Define the User type (automatically generated by the default structure)
 type UserScheme = typeof userScheme
 
-// 通过基类初始化
+// Initialization by base class
 const User = new (class extends MysqlNative<UserScheme> {
   constructor() {
     super(
       {
-        name: 'User', // 表名，默认会转化为下划线(snackCase)形式，如 User->user UserPhoto->user_photo
-        title: '用户表', // 表的备注名称
-        scheme: userScheme, // 表的默认结构
-        pick: ['userId', 'name'], // 查询列表时显示的字段信息
+        name: 'User', // Table name, default transformation into a `snackcase` format, such as User->user UserPhoto->user_photo
+        title: 'User Table', // Table note name
+        scheme: userScheme, // Default structure of the table
+        pick: ['userId', 'name'], // Field information displayed when querying the list
       },
+      // Binding configuration instance bin
       mysqlBin
-    ) // 绑定配置实例bin
+    )
   }
 
-  // 自定义方法
+  // Custom method
   async customMethod() {
-    // 做一些事情
+    // Do something
   }
 })()
 ```
 
-一般一个数据表对应一个模型，定义模型后，我们直接操作模型就可以对表进行操作
+Generally, a data sheet corresponds to a model, and after the model is defined, we can operate the model directly to operate the table
 
 ```typescript
-// 插入
-await User.insert({ name: '王小明', gender: 1 }) // 返回 'id001'，即该条数据的 userId = 'id001'
+// Insert
+await User.insert({ name: 'Tom', gender: 1 }) // return 'id001', userId = 'id001' of this data
 
-// 批量插入
+// Batch insert
 await User.mInsert([
-  { name: '王小明', gender: 1 },
-  { name: '宋小华', gender: 1 },
-]) // 返回 ['id002','id003']
+  { name: 'Tom', gender: 1 },
+  { name: 'Jerry', gender: 1 },
+]) // return ['id002','id003']
 
-// 通过ID更新
-await User.updateById('id002', { name: '李四' }) // 返回 1
+// Update by ID
+await User.updateById('id002', { name: 'Lily' }) // return 1
 
-// 通过ID批量更新
-await User.updateByIds(['id002', 'id003'], { status: 2 }) // 返回 2
+// Batch update by ID array
+await User.updateByIds(['id002', 'id003'], { status: 2 }) // return 2
 
-// 通过ID更新或插入(如果id存在就更新，如果不存在就插入)
-await User.upsertById('id002', { name: '王小明', gender: 1 }) // 返回 1 ，更新了一条 userId = 'id02' 的数据
-await User.upsertById('id004', { name: '李四', gender: 1 }) // 返回 0 ，插入一条新数据，数据的 userId = 'id04'
+// Update or insert the ID (id exists if updated, if there is no insert)
+await User.upsertById('id002', { name: 'Tom', gender: 1 }) // return 1, update one data of userId = 'id02'
+await User.upsertById('id004', { name: 'Lily', gender: 1 }) // return 0, insert a new data of userId = 'id04'
 
-// 通过ID删除多个
-await User.deleteByIds(['id003', 'id004']) // 返回 2
+// Delete by ID array
+await User.deleteByIds(['id003', 'id004']) // return 2
 
-// 通过ID查询一个，第二个参数设置返回结果所包含的数据
-await User.getById('id001', ['name']) // 数据为{userId:'id001',name:'王小明',gender:1,status:1,...} 实际返回 {userId:'id001',name:'王小明'}
+// Query one by ID, the second parameter settings return the data contained in the result
+await User.getById('id001', ['name']) // data is {userId:'id001',name:'Tom',gender:1,status:1,...} return {userId:'id001',name:'Tom'}
 
-// 通过ID获取多个
-await User.mGetByIds(['id001', 'id002'], ['name']) //返回 {id001:{userId:'id001',name:'王小明'},id002:{userId:'id002',name:'李四'}}
+// Get multiple data by ID array
+await User.mGetByIds(['id001', 'id002'], ['name']) // return {id001:{userId:'id001',name:'Tom'},id002:{userId:'id002',name:'Lily'}}
 
-// 截断表
-await User.truncate() // 无返回值，不报错即成功截断整个表
+// Truncate table
+await User.truncate() // void, do not report an error is to operate successfully
 
-// 自定义方法
-await User.customMethod() // 执行自定义方法
+// Custom method
+await User.customMethod() // call a custom method
 ```
 
-实际项目中，我们可能需要定义多个模型，每个模型上都有一些公共方法。这时，我们可以抽象一个基类模型，其他模型继承这个基类模型
+In the actual project, we may need to define multiple models, and there are some public methods on each model. At this time, we can abstract a base class model, other models inherit this base class model
 
 ```typescript
 import { CoaMysql } from 'coa-mysql'
 
-// 通过mysqlBin定义一个模型的基类，各个模型都可以使用这个基类
+// Define the base class of a model by mysqlBin, each model can use this base class
 export class MysqlNativeModel<T> extends MysqlNative<T> {
   constructor(option: CoaMysql.ModelOption<T>) {
-    // 将实例配置bin绑定
+    // Configure the instance bin binding
     super(option, mysqlBin)
   }
 
-  // 也可以定义一些通用方法
+  // You can also define some general methods
   commonMethod() {
     // do something
   }
 }
 
-// 通过基类模型定义用户模型
+// Define user model by base model
 const User = new (class extends MysqlNativeModel<UserScheme> {
   constructor() {
-    super({ name: 'User', title: '用户表', scheme: userScheme, pick: ['userId', 'name'] })
+    super({ name: 'User', title: 'User Table', scheme: userScheme, pick: ['userId', 'name'] })
   }
 
-  // 自定义方法
+  // Custom method
   async customMethodForUser() {
-    // 做一些事情
+    // Do something
   }
 })()
 
-// 通过基类模型定义管理员模型
-const Manager = new (class extends MysqlNativeModel<UserScheme> {
+// Define Manager model by base model
+const Manager = new (class extends MysqlNativeModel<ManagerScheme> {
   constructor() {
-    super({ name: 'Manager', title: '管理员表', scheme: userScheme, pick: ['userId', 'name'] })
+    super({ name: 'Manager', title: 'Manager Table', scheme: managerScheme, pick: ['managerId', 'name'] })
   }
 })()
 
-// 用户模型和管理员模型均可以调用公共方法
+// Both user model and manager model can call common method
 await User.commonMethod()
 await Manager.commonMethod()
 
-// 仅仅用户模型可以调用自定义方法
+// Only user models can call custom method
 await User.customMethodForUser()
 ```
 
-### 缓存数据模型
+### Cache data model
 
-基于 [coa-redis](https://www.npmjs.com/package/coa-redis) 实现快速高效的数据缓存逻辑，并**统一对缓存进行管理、维护缓存的生命周期、保证缓存与 MySQL 数据的一致性**
+Based on [coa-redis](https://www.npmjs.com/package/coa-redis) to achieve fast and efficient data cache logic, and **unify the cache, maintain the life cycle of the cache, to ensure the consistency of cache and mysql data**
 
-使用之前需安装 `coa-redis` ，使用方法可查看 [这里](https://github.com/coajs/coa-redis)
+Need to install `coa-redis` before use, instructions for use to view [here](https://github.com/coajs/coa-redis)
 
-缓存数据模型的使用方法和基本数据模型完全相同，仅需要将 `MysqlNative` 替换为 `MysqlCache`
+The method of use of cache data model is exactly the same as the basic data model. Only need to replace the `MysqlNative` to be `MysqlCache`
 
 ```typescript
 import { CoaMysql, MysqlCache } from 'coa-mysql'
 import { RedisBin, RedisCache } from 'coa-redis'
 
-// 定义一个redis实例，详细用法详见 https://github.com/coajs/coa-redis
+// Define a Redis instance, detail usage see https://github.com/coajs/coa-redis
 const redisCache = new RedisCache(new RedisBin({ host: '127.0.0.1' }))
 
-// 定义一个缓存数据模型的基类
+// Define the base class for a cache data model
 export class MysqlCacheModel<T> extends MysqlCache<T> {
   constructor(option: CoaMysql.ModelOption<T>) {
-    // 将配置实例 和 redisCache实例 都绑定到这个基类上
+    // Bind the configuration instance and the redisCache instance on this base class
     super(option, mysqlBin, redisCache)
   }
 }
 
-// 通过缓存基类模型定义缓存用户模型
+// Define cache user model by cache base class
 const UserCached = new (class extends MysqlCacheModel<UserScheme> {
   constructor() {
-    super({ name: 'User', title: '用户表', scheme: userScheme, pick: ['userId', 'name'] })
+    super({ name: 'User', title: 'User Table', scheme: userScheme, pick: ['userId', 'name'] })
   }
 })()
 
-// 查询数据
-await User.getById('id001') // 首次查询会先读取数据库
-await User.getById('id001') // 第二次调用会直接从缓存中读取数据
+// Query data
+await User.getById('id001') // First query will read the database
+await User.getById('id001') // The second call will read data directly from the cache
 
-// 增删改操作和基本数据模型一直
-await User.insert({ name: '王小明', gender: 1 }) // 返回 'id001'
-await User.updateById('id001', { name: '李四' }) // 返回 1
+// Insert, delete, update, just like the basic data model
+await User.insert({ name: 'Tom', gender: 1 }) // return 'id001'
+await User.updateById('id001', { name: 'Lily' }) // return 1
 ```
 
-缓存模型会自动维护和管理缓存，如果缓存已经存在，接下来又调用 update 更新了数据，再次查询数据时自动从数据库中取出最新的数据。 实现原理可点击 这里(todo) 了解更多
+The cache model automatically maintains and manages caches. If the cache already exists, then call `updated` updated the data, and automatically remove the latest data from the database when querying the data again. Realization Principle Click here (todo) Learn more
