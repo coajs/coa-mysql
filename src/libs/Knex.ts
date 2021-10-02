@@ -15,6 +15,7 @@ declare module 'knex' {
   }
 }
 
+// 搜索语法糖，可以搜索多个列
 Knex.QueryBuilder.extend('search', function (columns: string[], value: string) {
   const length = columns.length
   value &&
@@ -26,16 +27,19 @@ Knex.QueryBuilder.extend('search', function (columns: string[], value: string) {
     })
   return this
 })
+// 筛选语法糖，可以筛选出对应数据，如果传否值，则会被忽略
 Knex.QueryBuilder.extend('filter', function (data: CoaMysql.Dic<string | number>, table?: string) {
   data = _.pickBy(data)
   if (table) data = _.mapKeys(data, (v, k) => table + '.' + k)
   return this.where(data)
 })
+// 时段筛选语法糖，根据列名和开始结束时间筛选
 Knex.QueryBuilder.extend('period', function (column: string, from: number, to: number) {
   column && from > 0 && this.where(column, '>=', from)
   column && to > 0 && this.where(column, '<=', to)
   return this
 })
+// 判断是否在数组中
 Knex.QueryBuilder.extend('inArray', function (array_column: string, value: string | number) {
   array_column && value && this.whereRaw('JSON_CONTAINS( ??, JSON_ARRAY( ? ) )', [array_column, value])
   return this
