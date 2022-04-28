@@ -44,8 +44,8 @@ export class MysqlNative<Scheme> {
     // 处理caches
     this.caches = _.defaults(option.caches, { index: [], count: [] })
     // 将需要用到缓存的字段单独记录为一个数组，方便判断是否需要处理缓存
-    _.forEach(this.caches, (items) =>
-      items.forEach((item) => {
+    _.forEach(this.caches, items =>
+      items.forEach(item => {
         const field = item.split(/[:,]/)[0]
         !this.cachesFields.includes(field) && this.cachesFields.push(field)
       })
@@ -53,7 +53,7 @@ export class MysqlNative<Scheme> {
     // 处理pick unpick
     this.pick = option.pick || []
     const unpick = option.unpick || []
-    unpick.forEach((u) => delete (option.scheme as any)[u])
+    unpick.forEach(u => delete (option.scheme as any)[u])
     // 处理columns
     _.forEach(this.scheme, (v, k: string) => {
       if (v && typeof v === 'object') this.jsons.push(k)
@@ -159,7 +159,7 @@ export class MysqlNative<Scheme> {
       const key = v[this.key] as string
       result[key] = this.result(v, pick) as any
     })
-    ids.forEach((id) => {
+    ids.forEach(id => {
       if (!result.hasOwnProperty(id)) result[id] = null as any
     })
     return result
@@ -265,12 +265,12 @@ export class MysqlNative<Scheme> {
   protected result(data: any, pick: string[]) {
     if (data === null || data === undefined) return null
     // 处理json
-    this.jsons.forEach((k) => {
+    this.jsons.forEach(k => {
       if (data[k]) data[k] = JSON.parse(data[k])
     })
     // 处理默认值
     const result = {} as any
-    pick.forEach((k) => {
+    pick.forEach(k => {
       result[k] = data.hasOwnProperty(k) ? data[k] : this.scheme[k]
     })
     return result as Scheme
@@ -281,10 +281,10 @@ export class MysqlNative<Scheme> {
     // 当为insert的时候填满数据
     insert && _.defaults(data, this.scheme)
     // 处理json
-    this.jsons.forEach((k) => {
+    this.jsons.forEach(k => {
       if (typeof data[k] === 'object') data[k] = JSON.stringify(data[k])
     })
-    this.virtual.forEach((k) => {
+    this.virtual.forEach(k => {
       delete data[k]
     })
     return data

@@ -75,7 +75,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
   }
 
   async mGetByIds(ids: string[], pick = this.pick, trx?: CoaMysql.Transaction, ms = this.ms, force = false) {
-    const result = await this.redisCache.mWarp(this.getCacheNsp('id'), ids, async (ids) => await super.mGetByIds(ids, this.columns, trx), ms, force)
+    const result = await this.redisCache.mWarp(this.getCacheNsp('id'), ids, async ids => await super.mGetByIds(ids, this.columns, trx), ms, force)
     _.forEach(result, (v, k) => {
       result[k] = this.pickResult(v, pick)
     })
@@ -114,7 +114,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
 
   protected async mGetCountBy(field: string, ids: string[], trx?: CoaMysql.Transaction) {
     const cacheNsp = this.getCacheNsp('count', field)
-    return await this.redisCache.mWarp(cacheNsp, ids, async (ids) => {
+    return await this.redisCache.mWarp(cacheNsp, ids, async ids => {
       const rows = (await this.table(trx).select({ id: field }).count({ count: this.key }).whereIn(field, ids).groupBy(field)) as any[]
       const result: CoaMysql.Dic<number> = {}
       _.forEach(rows, ({ id, count }) => (result[id] = count))
@@ -145,7 +145,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
     let has = true
     const resultList = [] as Array<CoaMysql.SafePartial<Scheme>>
     if (data) {
-      has = _.some(this.cachesFields, (i) => (data as any)[i] !== undefined)
+      has = _.some(this.cachesFields, i => (data as any)[i] !== undefined)
       resultList.push(data)
     }
     if (has) {
@@ -161,7 +161,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
     deleteIds.push([this.getCacheNsp('data'), []])
     _.forEach(this.caches, (items, name) => {
       // name可能为index,count,或自定义
-      items.forEach((item) => {
+      items.forEach(item => {
         const keys = item.split(/[:,]/)
         const key = keys[0]
         const ids = [] as string[]
