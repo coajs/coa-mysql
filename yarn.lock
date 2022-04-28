@@ -423,7 +423,7 @@ cluster-key-slot@^1.1.0:
 
 coa-echo@^1.2.1:
   version "1.2.1"
-  resolved "http://bnpm.byted.org/coa-echo/-/coa-echo-1.2.1.tgz#9ab861729dc8086bbaf8cca1d7227053ef8a1db3"
+  resolved "https://registry.yarnpkg.com/coa-echo/-/coa-echo-1.2.1.tgz#9ab861729dc8086bbaf8cca1d7227053ef8a1db3"
   integrity sha512-CxXNxaj0hjK+1SahqYDjzA/2bAg/sz7Y7u05u0sJVeQL6myBYI0Omi8FWr8k3zxF5Oxxx+6wyK+FIqrI2M62aQ==
 
 coa-error@^1.5.2:
@@ -444,7 +444,7 @@ coa-helper@^1.2.1:
 
 coa-redis@^1.6.0:
   version "1.6.0"
-  resolved "http://bnpm.byted.org/coa-redis/-/coa-redis-1.6.0.tgz#7aa401ae0d2b71d78ca5c968a6058016c05b80be"
+  resolved "https://registry.yarnpkg.com/coa-redis/-/coa-redis-1.6.0.tgz#7aa401ae0d2b71d78ca5c968a6058016c05b80be"
   integrity sha512-5MwMgP5bhnyK7pL1DnndgyJotkEg36WA3DOTa7jXy4PNVuKedQr+ZtL3KRtsEjd5Bd+b7qOsdD+285eOBPZucw==
   dependencies:
     "@types/ioredis" "^4.27.6"
