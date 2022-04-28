@@ -73,10 +73,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@types/ioredis@^4.26.4":
-  version "4.27.1"
-  resolved "https://registry.yarnpkg.com/@types/ioredis/-/ioredis-4.27.1.tgz#f1c2d8a4341ed5ff9f4dd7aebfb38e275e3b3197"
-  integrity sha512-+JichYPCtVapxi5Z+7V/8Uhn+4Piz+rkb03JQTQ0kW0pkV71+bmzSTkpwmIqa7FfWIszp0VbRyN8gfgWDNQMdA==
+"@types/ioredis@^4.27.6":
+  version "4.28.10"
+  resolved "https://registry.yarnpkg.com/@types/ioredis/-/ioredis-4.28.10.tgz#40ceb157a4141088d1394bb87c98ed09a75a06ff"
+  integrity sha512-69LyhUgrXdgcNDv7ogs1qXZomnfOEnSmrmMFqKgt1XMJxmoOSG/u3wYy13yACIfKuMJ8IhKgHafDO3sx19zVQQ==
   dependencies:
     "@types/node" "*"
 
@@ -421,10 +421,10 @@ cluster-key-slot@^1.1.0:
   resolved "https://registry.yarnpkg.com/cluster-key-slot/-/cluster-key-slot-1.1.0.tgz#30474b2a981fb12172695833052bc0d01336d10d"
   integrity sha512-2Nii8p3RwAPiFwsnZvukotvow2rIHM+yQ6ZcBXGHdniadkYGZYiGmkHJIbZPIV9nfv7m/U1IPMVVcAhoWFeklw==
 
-coa-echo@^1.1.1, coa-echo@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/coa-echo/-/coa-echo-1.2.0.tgz#5281ca7b6a0f2cb5fdbd96f03e0ac59115df28cd"
-  integrity sha512-e7WZima2wAQfsjOXlyZ7rq4MdDLOqWVMKZD1yIK360t4YM1UqeA0ztdo4Xbs1LyJB4+EPBuScWY9vOULx6Wq8Q==
+coa-echo@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/coa-echo/-/coa-echo-1.2.1.tgz#9ab861729dc8086bbaf8cca1d7227053ef8a1db3"
+  integrity sha512-CxXNxaj0hjK+1SahqYDjzA/2bAg/sz7Y7u05u0sJVeQL6myBYI0Omi8FWr8k3zxF5Oxxx+6wyK+FIqrI2M62aQ==
 
 coa-error@^1.5.2:
   version "1.5.2"
@@ -442,16 +442,16 @@ coa-helper@^1.2.1:
     hashids "^2.2.8"
     lodash "^4.17.21"
 
-coa-redis@^1.4.0-2:
-  version "1.4.0-2"
-  resolved "https://registry.yarnpkg.com/coa-redis/-/coa-redis-1.4.0-2.tgz#3177e8e939d138e1a329bfb5d92ce8370dd0ce4a"
-  integrity sha512-4WGrBxECj3JjQF72OdYm2NlsSKYgHeSZPsA8XIi4Orn4GH/7rcQi0sw1itpl0g1ONI2WwqLpvC+UWVU9HqgGXg==
+coa-redis@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/coa-redis/-/coa-redis-1.6.0.tgz#7aa401ae0d2b71d78ca5c968a6058016c05b80be"
+  integrity sha512-5MwMgP5bhnyK7pL1DnndgyJotkEg36WA3DOTa7jXy4PNVuKedQr+ZtL3KRtsEjd5Bd+b7qOsdD+285eOBPZucw==
   dependencies:
-    "@types/ioredis" "^4.26.4"
-    coa-echo "^1.1.1"
+    "@types/ioredis" "^4.27.6"
+    coa-echo "^1.2.1"
     coa-error "^1.5.2"
     coa-helper "^1.2.1"
-    ioredis "^4.27.4"
+    ioredis "^4.27.10"
 
 coa-secure@^1.2.0:
   version "1.2.0"
@@ -1314,10 +1314,10 @@ interpret@^2.2.0:
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-2.2.0.tgz#1a78a0b5965c40a5416d007ad6f50ad27c417df9"
   integrity sha512-Ju0Bz/cEia55xDwUWEa8+olFpCiQoypjnQySseKtmjNrnps3P+xfpUmGr90T7yjlVJmOtybRvPXhKMbHr+fWnw==
 
-ioredis@^4.27.4:
-  version "4.27.8"
-  resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-4.27.8.tgz#822c2d1ac44067a8f7b92fb673070fc9d661c56e"
-  integrity sha512-AcMEevap2wKxNcYEybZ/Qp+MR2HbNNUwGjG4sVCC3cAJ/zR9HXKAkolXOuR6YcOGPf7DHx9mWb/JKtAGujyPow==
+ioredis@^4.27.10:
+  version "4.28.5"
+  resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-4.28.5.tgz#5c149e6a8d76a7f8fa8a504ffc85b7d5b6797f9f"
+  integrity sha512-3GYo0GJtLqgNXj4YhrisLaNNvWSNwSS2wS4OELGfGxH8I69+XfNdnmV1AyN+ZqMh0i7eX+SWjrwFKDBDgfBC1A==
   dependencies:
     cluster-key-slot "^1.1.0"
     debug "^4.3.1"

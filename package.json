@@ -23,10 +23,10 @@
     "sync": "curl -X PUT 'https://npm.taobao.org/sync/coa-mysql?sync_upstream=true'"
   },
   "dependencies": {
-    "coa-echo": "^1.2.0",
+    "coa-echo": "^1.2.1",
     "coa-error": "^1.5.2",
     "coa-helper": "^1.2.1",
-    "coa-redis": "^1.4.0-2",
+    "coa-redis": "^1.6.0",
     "coa-secure": "^1.2.0",
     "knex": "0.21",
     "mysql": "^2.18.1"
