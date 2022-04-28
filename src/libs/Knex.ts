@@ -20,7 +20,7 @@ Knex.QueryBuilder.extend('search', function (columns: string[], value: string) {
   const length = columns.length
   value &&
     length &&
-    this.where((qb) => {
+    this.where(qb => {
       const search = '%' + value + '%'
       if (length >= 1) qb.where(columns[0], 'like', search)
       if (length >= 2) for (let i = 1; i < length; i++) qb.orWhere(columns[i], 'like', search)
