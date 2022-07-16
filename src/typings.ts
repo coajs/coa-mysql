@@ -39,5 +39,6 @@ export namespace CoaMysql {
     }
     debug: boolean
     trace: boolean
+    pool?: { min: number; max: number }
   }
 }
