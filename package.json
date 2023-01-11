@@ -28,7 +28,7 @@
     "coa-helper": "^1.2.1",
     "coa-redis": "^1.6.0",
     "coa-secure": "^1.2.0",
-    "knex": "0.21",
+    "knex": "2.4",
     "mysql": "^2.18.1"
   },
   "devDependencies": {
