@@ -49,7 +49,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
   async upsertById(id: string, data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList([id], data, trx)
     const result = await super.upsertById(id, data, trx);
-    if (result) { (trx && (trx as any).trxUpdateCacheTaskList) ? await (trx as any).trxUpdateCacheTaskList(this, [id], dataList) : await this.deleteCache([id], dataList) }
+    (trx && (trx as any).trxUpdateCacheTaskList) ? await (trx as any).trxUpdateCacheTaskList(this, [id], dataList) : await this.deleteCache([id], dataList)
     return result
   }
 
