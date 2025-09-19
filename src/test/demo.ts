@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
 // @ts-nocheck
-import { $ } from 'coa-helper'
+import { $, _ } from 'coa-helper'
 import { RedisBin, RedisCache } from 'coa-redis'
 import { MysqlBin, MysqlCache } from '..'
 // MySQL配置
@@ -69,6 +69,7 @@ const User = new (class extends MysqlCache<UserScheme> {
         title: '用户表', // 表的备注名称
         scheme: userScheme, // 表的默认结构
         pick: ['userId', 'name'], // 查询列表时显示的字段信息
+        caches: { index: ['name'], count: ['userId', 'name'] }
       },
       mysqlBin,
       redisCache,
@@ -99,12 +100,14 @@ const User = new (class extends MysqlCache<UserScheme> {
 
 // await User.updateById('id002', { name: '李四' }) // 返回 1
 const a = async () => {
+  await User.checkById('41102319990728253X')
   await mysqlBin.safeTransaction(async (trx: CoaMysql.Transaction) => {
     await User.updateById('41102319990728253X', { name: 'mmm' }, trx)
-    const q = await User.checkById('41102319990728253X', Object.keys(userScheme), trx)
-    console.log(q);
-    await $.timeout(3000)
-    await User.updateById('1758003943672Y2', { name: 'heyifan2' }, trx)
+    for (let index = 0; index < 10; index++) {
+      const userId = `${_.now()}-${index}-Y`
+      await $.timeout(3000)
+      await User.insert({ userId, name: 'heyifan2' }, trx)
+    }
   })
   const b = await User.checkById('41102319990728253X')
   console.log(b);

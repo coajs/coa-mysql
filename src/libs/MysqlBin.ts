@@ -34,31 +34,23 @@ export class MysqlBin {
 
   async safeTransaction<T>(handler: (trx: CoaMysql.Transaction) => Promise<T>): Promise<T> {
 
-    let cacheTasks = {
-      trxUpdateCacheTaskList: [] as Array<{ model: MysqlCache<any>, ids: string[], dataList: any[] }>,
-      trxRaeadCacheNspsList: [] as Array<{ model: MysqlCache<any>, nsp: string }>
-    };
+    let cacheTasks = [] as Array<{ model: MysqlCache<any>, ids: string[], dataList: any[] }>
 
     const result = await this.io.transaction(async (trx: any) => {
       trx.id ||= secure.id25(`${Date.now()}-${Math.floor(Math.random() * 1e6).toString().padStart(6, '0')}`)
-      trx.trxUpdateCacheTaskList = (model: MysqlCache<any>, ids: string[], dataList: any[]) => {
-        cacheTasks.trxUpdateCacheTaskList.push({ model, ids, dataList })
-      }
-      trx.trxRaeadCacheNspsList = (model: MysqlCache<any>, nsp: string) => {
-        cacheTasks.trxRaeadCacheNspsList.push({ model, nsp })
+      //  收集事务更新缓存数据
+      trx.trxUpdateCacheTaskList = async (model: MysqlCache<any>, ids: string[], dataList: any[]) => {
+        cacheTasks.push({ model, ids, dataList })
       }
       return await handler(trx)
     })
-
-    for (const task of cacheTasks.trxUpdateCacheTaskList) {
+    // 统一清理事务更新缓存
+    for (const task of cacheTasks) {
       await task.model.deleteCache(task.ids, task.dataList)
     }
 
-    for (const readCacheNsp of cacheTasks.trxRaeadCacheNspsList) {
-      await readCacheNsp.model.redisCache.clear(readCacheNsp.nsp)
-    }
     // 初始数组 减少trx未及时销毁时的内存占用
-    cacheTasks = { trxUpdateCacheTaskList: [], trxRaeadCacheNspsList: [] }
+    cacheTasks = []
 
     return result
   }
