@@ -69,7 +69,8 @@ const User = new (class extends MysqlCache<UserScheme> {
         title: '用户表', // 表的备注名称
         scheme: userScheme, // 表的默认结构
         pick: ['userId', 'name'], // 查询列表时显示的字段信息
-        caches: { index: ['name'], count: ['userId', 'name'] }
+        caches: { index: ['name'], count: ['userId', 'name'] },
+
       },
       mysqlBin,
       redisCache,

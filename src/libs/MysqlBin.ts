@@ -1,6 +1,5 @@
 import { echo } from 'coa-echo'
 import { CoaError } from 'coa-error'
-import { secure } from 'coa-secure'
 import { MysqlCache } from '../services/MysqlCache'
 import { CoaMysql } from '../typings'
 import { Knex } from './Knex'
@@ -33,11 +32,9 @@ export class MysqlBin {
   }
 
   async safeTransaction<T>(handler: (trx: CoaMysql.Transaction) => Promise<T>): Promise<T> {
-
     let cacheTasks = [] as Array<{ model: MysqlCache<any>, ids: string[], dataList: any[] }>
 
     const result = await this.io.transaction(async (trx: any) => {
-      trx.id ||= secure.id25(`${Date.now()}-${Math.floor(Math.random() * 1e6).toString().padStart(6, '0')}`)
       //  收集事务更新缓存数据
       trx.trxUpdateCacheTaskList = async (model: MysqlCache<any>, ids: string[], dataList: any[]) => {
         cacheTasks.push({ model, ids, dataList })
