@@ -28,35 +28,35 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
   async updateById(id: string, data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList([id], data, trx)
     const result = await super.updateById(id, data, trx);
-    (trx && (trx as any).trxUpdateCacheTaskList) ? await (trx as any).trxUpdateCacheTaskList(this, [id], dataList) : await this.deleteCache([id], dataList)
+    if (result) { (trx && (trx as any).trxUpdateCacheTaskList) ? await (trx as any).trxUpdateCacheTaskList(this, [id], dataList) : await this.deleteCache([id], dataList) }
     return result
   }
 
   async updateByIds(ids: string[], data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList(ids, data, trx)
     const result = await super.updateByIds(ids, data, trx);
-    (trx && (trx as any).trxUpdateCacheTaskList) ? await (trx as any).trxUpdateCacheTaskList(this, ids, dataList) : await this.deleteCache(ids, dataList)
+    if (result) { (trx && (trx as any).trxUpdateCacheTaskList) ? await (trx as any).trxUpdateCacheTaskList(this, ids, dataList) : await this.deleteCache(ids, dataList) }
     return result
   }
 
   async updateForQueryById(id: string, query: CoaMysql.Query, data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList([id], data, trx)
     const result = await super.updateForQueryById(id, query, data, trx);
-    (trx && (trx as any).trxUpdateCacheTaskList) ? await (trx as any).trxUpdateCacheTaskList(this, [id], dataList) : await this.deleteCache([id], dataList)
+    if (result) { (trx && (trx as any).trxUpdateCacheTaskList) ? await (trx as any).trxUpdateCacheTaskList(this, [id], dataList) : await this.deleteCache([id], dataList) }
     return result
   }
 
   async upsertById(id: string, data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList([id], data, trx)
     const result = await super.upsertById(id, data, trx);
-    (trx && (trx as any).trxUpdateCacheTaskList) ? await (trx as any).trxUpdateCacheTaskList(this, [id], dataList) : await this.deleteCache([id], dataList)
+    if (result) { (trx && (trx as any).trxUpdateCacheTaskList) ? await (trx as any).trxUpdateCacheTaskList(this, [id], dataList) : await this.deleteCache([id], dataList) }
     return result
   }
 
   async deleteByIds(ids: string[], trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList(ids, undefined, trx)
     const result = await super.deleteByIds(ids, trx);
-    (trx && (trx as any).trxUpdateCacheTaskList) ? await (trx as any).trxUpdateCacheTaskList(this, ids, dataList) : await this.deleteCache(ids, dataList)
+    if (result) { (trx && (trx as any).trxUpdateCacheTaskList) ? await (trx as any).trxUpdateCacheTaskList(this, ids, dataList) : await this.deleteCache(ids, dataList) }
     return result
   }
 
