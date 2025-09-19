@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
 // @ts-nocheck
-import { $, _ } from 'coa-helper'
+import { $ } from 'coa-helper'
 import { RedisBin, RedisCache } from 'coa-redis'
 import { MysqlBin, MysqlCache } from '..'
 // MySQL配置
@@ -101,13 +101,16 @@ const User = new (class extends MysqlCache<UserScheme> {
 const a = async () => {
   await mysqlBin.safeTransaction(async (trx: CoaMysql.Transaction) => {
     await User.updateById('41102319990728253X', { name: 'mmm' }, trx)
-    const q = await User.checkById('41102319990728253X', ['name'], trx)
+    const q = await User.checkById('41102319990728253X', Object.keys(userScheme), trx)
     console.log(q);
     await $.timeout(3000)
-    await User.insert({ name: 'heyifan2', userId: `${_.now()}Y${123}` }, trx)
+    await User.updateById('1758003943672Y2', { name: 'heyifan2' }, trx)
   })
   const b = await User.checkById('41102319990728253X')
   console.log(b);
-
+  // const id = await redisCache.clearUseless('*id')
+  // console.log('cRedis: ID类型过期缓存清除成功', id)
+  // const data = await redisCache.clearUseless('*data')
+  // console.log('cRedis: DATA类型过期缓存清除成功', data)
 }
 a()
