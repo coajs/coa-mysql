@@ -17,7 +17,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
   async insert(data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const id = await super.insert(data, trx)
     if (id) {
-      (trx && (trx as any).registerCacheClear) ? (trx as any).registerCacheClear(this, [id], data) : await this.deleteCache([id], [data])
+      (trx && (trx as any).registerCacheClear) ? (trx as any).registerCacheClear(this, [id], [data]) : await this.deleteCache([id], [data])
     }
     return id
   }

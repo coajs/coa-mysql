@@ -1,10 +1,9 @@
 import { echo } from 'coa-echo'
 import { CoaError } from 'coa-error'
+import { secure } from 'coa-secure'
 import { MysqlCache } from '../services/MysqlCache'
 import { CoaMysql } from '../typings'
 import { Knex } from './Knex'
-
-import { secure } from 'coa-secure'
 export class MysqlBin {
   public io: Knex
   public config: CoaMysql.Config
@@ -41,7 +40,6 @@ export class MysqlBin {
         cacheTasks.push({ model, ids, dataList })
         trx.id ||= secure.id25(`${Date.now()}-${model}`)
       }
-
       return await handler(trx)
     })
 
