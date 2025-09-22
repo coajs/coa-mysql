@@ -45,17 +45,6 @@ const userScheme = {
     updated: 0 as number,
 }
 
-// const userScheme1 = {
-//   userId: '' as string,
-//   name: '' as string,
-//   mobile: '' as string,
-//   avatar: '' as string,
-//   gender: 1 as number,
-//   language: '' as string,
-//   status: 1 as number,
-//   created: 0 as number,
-//   updated: 0 as number,
-// }
 
 // 定义User类型（通过默认结构自动生成）
 type UserScheme = typeof userScheme
@@ -79,28 +68,6 @@ const User = new (class extends MysqlCache<UserScheme> {
     }
 })()
 
-// const User1 = new (class extends MysqlCache<UserScheme> {
-//   constructor() {
-//     super(
-//       {
-//         name: 'User1', // 表名，默认会转化为下划线(snackCase)形式，如 User->user UserPhoto->user_photo
-//         title: '用户表', // 表的备注名称
-//         scheme: userScheme1, // 表的默认结构
-//         pick: ['userId', 'name'], // 查询列表时显示的字段信息
-//       },
-//       mysqlBin,
-//       redisCache,
-//     )
-//   }
-// })()
-
-// 批量插入
-// await User.mInsert([
-//   { name: '王小明', gender: 1 },
-//   { name: '宋小华', gender: 1 },
-// ])
-
-// await User.updateById('id002', { name: '李四' }) // 返回 1
 const a = async () => {
     await User.checkById('41102319990728253X')
     await $.timeout(3000)
