@@ -1,6 +1,5 @@
 import { echo } from 'coa-echo'
 import { CoaError } from 'coa-error'
-import { MysqlCache } from '../services/MysqlCache'
 import { CoaMysql } from '../typings'
 import { Knex } from './Knex'
 export class MysqlBin {
@@ -29,26 +28,5 @@ export class MysqlBin {
     // 赋值
     this.config = config
     this.io = io
-  }
-
-  async safeTransaction<T>(handler: (trx: CoaMysql.Transaction) => Promise<T>): Promise<T> {
-    let cacheTasks = [] as Array<{ model: MysqlCache<any>, ids: string[], dataList: any[] }>
-
-    const result = await this.io.transaction(async (trx: any) => {
-      //  收集事务更新缓存数据
-      trx.trxUpdateCacheTaskList = async (model: MysqlCache<any>, ids: string[], dataList: any[]) => {
-        cacheTasks.push({ model, ids, dataList })
-      }
-      return await handler(trx)
-    })
-    // 统一清理事务更新缓存
-    for (const task of cacheTasks) {
-      await task.model.deleteCache(task.ids, task.dataList)
-    }
-
-    // 初始数组 减少trx未及时销毁时的内存占用
-    cacheTasks = []
-
-    return result
   }
 }
