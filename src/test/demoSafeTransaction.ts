@@ -69,17 +69,17 @@ const User = new (class extends MysqlCache<UserScheme> {
 })()
 
 const a = async () => {
-    await User.checkById('41102319990728253X')
+    await User.checkById('411******728253X')
     await $.timeout(3000)
     await safeTransaction.safeTransaction(async (trx: CoaMysql.Transaction) => {
-        await User.updateById('41102319990728253X', { name: 'mmm' })
+        await User.updateById('411******728253X', { name: 'mmm' })
         for (let index = 0; index < 10; index++) {
             const userId = `${_.now()}-${index}-Y`
             await User.insert({ userId, name: 'heyifan2' }, trx)
         }
     })
     await $.timeout(3000)
-    const b = await User.checkById('41102319990728253X')
+    const b = await User.checkById('411******728253X')
     console.log(b);
 }
 a()
