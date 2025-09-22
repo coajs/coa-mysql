@@ -155,6 +155,8 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
   async deleteCache(ids: string[], dataList: Array<CoaMysql.SafePartial<Scheme>>, trx?: CoaMysql.Transaction) {
     if (trx && !(trx as any).clearCacheNsps) {
       (trx as any).clearCacheNsps = [] as any
+    }
+    if (trx && (trx as any).clearCacheNsps) {
       (trx as any).clearCacheNsps.push([this.getCacheNsp('id'), ids]);
       (trx as any).clearCacheNsps.push([this.getCacheNsp('data'), []])
     }
