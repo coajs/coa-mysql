@@ -55,6 +55,11 @@ export class MysqlNativeModel<T> extends MysqlNative<T> {
 const userScheme = {
   userId: '' as string,
   name: '' as string,
+  mobile: '' as string,
+  avatar: '' as string,
+  gender: 1 as number,
+  language: '' as string,
+  status: 1 as number,
   created: 0 as number,
   updated: 0 as number,
 }
