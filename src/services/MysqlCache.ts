@@ -28,21 +28,21 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
   async updateById(id: string, data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList([id], data, trx)
     const result = await super.updateById(id, data, trx)
-    await this.deleteCache([id], dataList, trx)
+    if (result) await this.deleteCache([id], dataList, trx)
     return result
   }
 
   async updateByIds(ids: string[], data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList(ids, data, trx)
     const result = await super.updateByIds(ids, data, trx);
-    await this.deleteCache(ids, dataList, trx)
+    if (result) await this.deleteCache(ids, dataList, trx)
     return result
   }
 
   async updateForQueryById(id: string, query: CoaMysql.Query, data: CoaMysql.SafePartial<Scheme>, trx?: CoaMysql.Transaction) {
     const dataList = await this.getCacheChangedDataList([id], data, trx)
     const result = await super.updateForQueryById(id, query, data, trx);
-    await this.deleteCache([id], dataList, trx)
+    if (result) await this.deleteCache([id], dataList, trx)
     return result
   }
 
