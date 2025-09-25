@@ -19,10 +19,7 @@ export class MysqlSafeTransaction {
             return result
         })
 
-        // 统一清理事务更新缓存
-        if (this.cache && clearCacheNsps.length > 0) {
-            await this.cache.mDelete(clearCacheNsps)
-        }
+        if (clearCacheNsps.length > 0) { await this.cache.mDelete(clearCacheNsps) }
         return result
     }
 }
