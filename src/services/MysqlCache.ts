@@ -175,6 +175,6 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
         }
       })
     })
-    if ((!trx as any).__isSafeTransaction) await this.redisCache.mDelete(deleteIds)
+    if (!(trx as any)?.__isSafeTransaction) await this.redisCache.mDelete(deleteIds)
   }
 }
