@@ -31,7 +31,7 @@ const redisCache = new RedisCache(redisBin)
 
 // 初始化Mysql基本连接，后续所有模型均依赖此实例
 const mysqlBin = new MysqlBin(mysqlConfig)
-const safeTransaction = new MysqlSafeTransaction(mysqlBin)
+const safeTransaction = new MysqlSafeTransaction(mysqlBin, redisCache)
 
 const userScheme = {
     userId: '' as string,
