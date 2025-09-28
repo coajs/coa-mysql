@@ -153,13 +153,14 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
   }
 
   async deleteCache(ids: string[], dataList: Array<CoaMysql.SafePartial<Scheme>>, trx?: CoaMysql.Transaction) {
+    const deleteIds = [] as CoaRedis.CacheDelete[]
     if ((trx as any)?.__isSafeTransaction) {
       (trx as any)?.clearCacheNsps.push([this.getCacheNsp('id'), ids]);
       (trx as any)?.clearCacheNsps.push([this.getCacheNsp('data'), []])
+    } else {
+      deleteIds.push([this.getCacheNsp('id'), ids])
+      deleteIds.push([this.getCacheNsp('data'), []])
     }
-    const deleteIds = [] as CoaRedis.CacheDelete[]
-    deleteIds.push([this.getCacheNsp('id'), ids])
-    deleteIds.push([this.getCacheNsp('data'), []])
     _.forEach(this.caches, (items, name) => {
       // name可能为index,count,或自定义
       items.forEach(item => {
