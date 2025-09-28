@@ -65,7 +65,7 @@ export class MysqlCache<Scheme> extends MysqlNative<Scheme> {
   }
 
   async getById(id: string, pick = this.columns, trx?: CoaMysql.Transaction, ms = this.ms, force = false) {
-    const result = trx ? await super.getById(id, this.columns, trx) : await this.redisCache.warp(this.getCacheNsp('id'), id, async () => await super.getById(id, this.columns, trx), ms, force)
+    const result = trx?.__isSafeTransaction ? await super.getById(id, this.columns, trx) : await this.redisCache.warp(this.getCacheNsp('id'), id, async () => await super.getById(id, this.columns, trx), ms, force)
     return this.pickResult(result, pick)
   }
 
