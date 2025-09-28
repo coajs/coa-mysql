@@ -13,7 +13,7 @@ export class MysqlSafeTransaction {
 
     async safeTransaction<T>(handler: (trx: CoaMysql.Transaction) => Promise<T>): Promise<T> {
         let clearCacheNsps: any[] = []
-        const result = await this.bin.io.transaction(async (trx: any) => {
+        const result = await this.bin.io.transaction(async (trx: CoaMysql.Transaction) => {
             trx.__isSafeTransaction = true
             trx.clearCacheNsps = []
 
