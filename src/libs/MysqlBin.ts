@@ -1,8 +1,7 @@
 import { echo } from 'coa-echo'
 import { CoaError } from 'coa-error'
-import { Knex } from './Knex'
 import { CoaMysql } from '../typings'
-
+import { Knex } from './Knex'
 export class MysqlBin {
   public io: Knex
   public config: CoaMysql.Config

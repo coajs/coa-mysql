@@ -7,7 +7,10 @@ export namespace CoaMysql {
   export type SafePartial<T> = T extends {} ? Partial<T> : any
   export type Query = (qb: Knex.QueryBuilder) => void
   export type QueryBuilder = Knex.QueryBuilder
-  export type Transaction = Knex.Transaction
+  export interface Transaction extends Knex.Transaction {
+    __isSafeTransaction?: boolean
+    clearCacheNsps?: any[]
+  }
   export interface Pager {
     rows: number
     last: number
